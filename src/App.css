@@ -41,11 +41,11 @@
   color: #888;
 }
 
-/* Responsive & Animated Admin Dashboard Styles */
+/* Admin Dashboard Styles */
 .dashboard-container {
   display: flex;
   min-height: 100vh;
-  background: #f4f7fa;
+  background: #ffffff; /* White background */
   font-family: 'Segoe UI', Arial, sans-serif;
   transition: padding-left 0.3s;
 }
@@ -105,7 +105,8 @@
   outline: none;
 }
 
-.sidebar nav ul li.active, .sidebar nav ul li:hover {
+.sidebar nav ul li.active,
+.sidebar nav ul li:hover {
   background: #ff9800;
   color: #fff;
   border-left: 4px solid #fff;
@@ -116,6 +117,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.sidebar-icon svg {
+  width: 20px;
+  height: 20px;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.sidebar nav ul li:hover .sidebar-icon svg {
+  transform: scale(1.1);
 }
 
 .sidebar-label {
@@ -134,6 +148,7 @@
   align-items: center;
   z-index: 200;
 }
+
 .hamburger {
   width: 28px;
   height: 3px;
@@ -142,7 +157,8 @@
   position: relative;
   transition: background 0.3s;
 }
-.hamburger::before, .hamburger::after {
+.hamburger::before,
+.hamburger::after {
   content: '';
   position: absolute;
   width: 28px;
@@ -207,7 +223,7 @@
 .dashboard-main {
   padding: 32px;
   flex: 1;
-  background: #f4f7fa;
+  background: #ffffff; /* White background */
   min-width: 0;
 }
 
@@ -240,12 +256,19 @@
   animation: cardFadeIn 0.7s cubic-bezier(.4,2,.6,1) forwards;
 }
 @keyframes cardFadeIn {
-  from { opacity: 0; filter: blur(4px) translateY(30px); }
-  to { opacity: 1; filter: none; transform: translateY(0) scale(1.03); }
+  from {
+    opacity: 0;
+    filter: blur(4px) translateY(30px);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+    transform: translateY(0) scale(1.03);
+  }
 }
 .card:hover {
   transform: translateY(-4px) scale(1.05) rotate(-1deg);
-  box-shadow: 0 6px 16px rgba(255,152,0,0.16);
+  box-shadow: 0 6px 16px rgba(255, 152, 0, 0.16);
 }
 .card h2 {
   font-size: 1.1rem;
@@ -288,9 +311,18 @@
   animation: chartShimmer 1.2s cubic-bezier(.4,2,.6,1) forwards;
 }
 @keyframes chartShimmer {
-  0% { opacity: 0; filter: blur(4px); }
-  60% { opacity: 0.7; filter: blur(1px); }
-  100% { opacity: 1; filter: none; }
+  0% {
+    opacity: 0;
+    filter: blur(4px);
+  }
+  60% {
+    opacity: 0.7;
+    filter: blur(1px);
+  }
+  100% {
+    opacity: 1;
+    filter: none;
+  }
 }
 .chart-placeholder::after {
   content: '';
@@ -304,13 +336,18 @@
   animation: shimmerMove 1.8s infinite;
 }
 @keyframes shimmerMove {
-  0% { left: -60%; }
-  100% { left: 120%; }
+  0% {
+    left: -60%;
+  }
+  100% {
+    left: 120%;
+  }
 }
 
 /* Responsive Styles */
 @media (max-width: 1200px) {
-  .summary-cards, .charts-section {
+  .summary-cards,
+  .charts-section {
     gap: 12px;
   }
   .dashboard-main {
@@ -329,7 +366,6 @@
     width: 220px;
     z-index: 100;
     box-shadow: 2px 0 16px rgba(26,35,126,0.12);
-    transition: transform 0.3s, width 0.3s;
   }
   .sidebar.closed {
     transform: translateX(-100%);
@@ -351,9 +387,6 @@
   }
   .dashboard-main {
     padding: 10px;
-  }
-  .main-section {
-    min-width: 0;
   }
   .sidebar-label {
     display: inline-block;
@@ -385,11 +418,13 @@
     font-size: 0.85rem;
     justify-content: center;
   }
-  .summary-cards, .charts-section {
+  .summary-cards,
+  .charts-section {
     flex-direction: column;
     gap: 10px;
   }
-  .card, .chart-placeholder {
+  .card,
+  .chart-placeholder {
     min-width: 0;
     width: 100%;
     padding: 18px 10px;
@@ -400,6 +435,11 @@
   .admin-profile img {
     width: 32px;
     height: 32px;
+  }
+
+  .sidebar-icon svg {
+    width: 18px;
+    height: 18px;
   }
 }
 
