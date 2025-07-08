@@ -1,21 +1,46 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../common';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Demo: accept any non-empty credentials
     if (!email || !password) {
       setError('Please enter both email and password.');
       return;
     }
     setError('');
-    navigate('/dashboard');
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        setError(errData.message || 'Login failed.');
+        setLoading(false);
+        return;
+      }
+      const data = await res.json();
+      // Store token (and optionally user info)
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify({ email: data.email, role: data.role, _id: data._id }));
+      setLoading(false);
+      navigate('/dashboard');
+    } catch (err) {
+      setError('Network error. Please try again.');
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,6 +60,7 @@ export default function Login() {
             className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
           />
           <input
             type="password"
@@ -42,13 +68,15 @@ export default function Login() {
             className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
           />
           {error && <div className="text-red-500 text-sm text-center">{error}</div>}
           <button
             type="submit"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow hover:bg-blue-700 transition mt-2"
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow hover:bg-blue-700 transition mt-2 disabled:opacity-60"
+            disabled={loading}
           >
-            Login
+            {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
       </div>

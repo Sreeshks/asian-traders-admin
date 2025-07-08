@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../layout/Layout';
+import { API_BASE_URL } from '../common';
 
 function Dashboard() {
   const [categories, setCategories] = useState([]);
   const [categoryName, setCategoryName] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [catError, setCatError] = useState('');
+  const [catLoading, setCatLoading] = useState(false);
 
   // For demo: static products per category
   const demoProducts = [
@@ -13,39 +16,95 @@ function Dashboard() {
     { id: 3, name: 'Product C', price: '$30' },
   ];
 
-  const handleAddCategory = (e) => {
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setCatError('');
+      setCatLoading(true);
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch(`${API_BASE_URL}/category`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          setCatError(data.message || 'Failed to fetch categories.');
+          setCatLoading(false);
+          return;
+        }
+        setCategories(data.data.map(cat => ({ id: cat._id, name: cat.name })));
+        setCatLoading(false);
+      } catch (err) {
+        setCatError('Network error. Please try again.');
+        setCatLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const handleAddCategory = async (e) => {
     e.preventDefault();
     if (!categoryName.trim()) return;
-    setCategories([
-      ...categories,
-      { id: Date.now(), name: categoryName.trim() },
-    ]);
-    setCategoryName('');
+    setCatError('');
+    setCatLoading(true);
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`${API_BASE_URL}/category`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name: categoryName.trim(), description: 'Sample' }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setCatError(data.message || 'Failed to add category.');
+        setCatLoading(false);
+        return;
+      }
+      setCategories([
+        ...categories,
+        { id: data.data._id, name: data.data.name },
+      ]);
+      setCategoryName('');
+      setCatLoading(false);
+    } catch (err) {
+      setCatError('Network error. Please try again.');
+      setCatLoading(false);
+    }
   };
 
-  const handleDeleteCategory = (id) => {
-    setCategories(categories.filter((cat) => cat.id !== id));
-    if (selectedCategory === id) setSelectedCategory(null);
+  const handleDeleteCategory = async (id) => {
+    setCatError('');
+    setCatLoading(true);
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`${API_BASE_URL}/category/category/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setCatError(data.message || 'Failed to delete category.');
+        setCatLoading(false);
+        return;
+      }
+      setCategories(categories.filter((cat) => cat.id !== id));
+      if (selectedCategory === id) setSelectedCategory(null);
+      setCatLoading(false);
+    } catch (err) {
+      setCatError('Network error. Please try again.');
+      setCatLoading(false);
+    }
   };
 
   return (
     <Layout>
       <main className="flex-1 p-6 md:p-10 bg-transparent">
-        {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-center">
-            <span className="text-3xl font-bold text-blue-600">{categories.length}</span>
-            <span className="text-gray-500 mt-2">Categories</span>
-          </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-center">
-            <span className="text-3xl font-bold text-blue-600">3</span>
-            <span className="text-gray-500 mt-2">Products (Demo)</span>
-          </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-center">
-            <span className="text-3xl font-bold text-blue-600">Premium</span>
-            <span className="text-gray-500 mt-2">Status</span>
-          </div>
-        </div>
         {/* Category Management */}
         <section className="mb-10">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">Category Management</h2>
@@ -56,9 +115,11 @@ function Dashboard() {
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
               className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm"
+              disabled={catLoading}
             />
-            <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition">Add</button>
+            <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition" disabled={catLoading}>Add</button>
           </form>
+          {catError && <div className="text-red-500 text-sm mt-2">{catError}</div>}
         </section>
         {/* Category Table */}
         <section className="mb-10">
