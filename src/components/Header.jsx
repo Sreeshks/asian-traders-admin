@@ -1,17 +1,13 @@
-import { FaUserCircle } from 'react-icons/fa';
+import React from 'react';
 
-function Header() {
+export default function Header() {
   return (
-    <header className="bg-white shadow px-6 py-4 flex justify-between items-center w-full">
-      {/* Left - Logo */}
-      <img src="/logo.png" alt="Asian Traders Logo" className="h-10" />
-
-      {/* Right - Profile Icon */}
-      <div className="flex items-center">
-        <FaUserCircle className="text-5xl text-orange-500 cursor-pointer hover:text-orange-600" />
+    <header className="bg-white shadow flex items-center justify-between px-8 py-4">
+      <h1 className="text-2xl font-bold text-blue-700 tracking-tight">Admin Dashboard</h1>
+      <div className="flex items-center gap-4">
+        <span className="text-gray-600 font-medium">Welcome, Admin</span>
+        <img src="https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff" alt="Admin" className="w-10 h-10 rounded-full shadow" />
       </div>
     </header>
   );
-}
-
-export default Header;
+} 
