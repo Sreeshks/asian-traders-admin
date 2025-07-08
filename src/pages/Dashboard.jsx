@@ -8,6 +8,12 @@ function Dashboard() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [catError, setCatError] = useState('');
   const [catLoading, setCatLoading] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [productForm, setProductForm] = useState({ name: '', description: '', price: '', offerprice: '', stock: '', image: null, categoryid: '' });
+  const [prodError, setProdError] = useState('');
+  const [prodLoading, setProdLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('categories');
+  const [dragActive, setDragActive] = useState(false);
 
   // For demo: static products per category
   const demoProducts = [
@@ -102,88 +108,231 @@ function Dashboard() {
     }
   };
 
+  const handleProductInput = (e) => {
+    const { name, value, files } = e.target;
+    setProductForm((prev) => ({
+      ...prev,
+      [name]: files ? files[0] : value,
+    }));
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setProductForm((prev) => ({ ...prev, image: e.dataTransfer.files[0] }));
+    }
+  };
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(true);
+  };
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  };
+  const handleFileInput = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setProductForm((prev) => ({ ...prev, image: e.target.files[0] }));
+    }
+  };
+
+  const handleAddProduct = async (e) => {
+    e.preventDefault();
+    setProdError('');
+    setProdLoading(true);
+    const token = localStorage.getItem('token');
+    try {
+      const formData = new FormData();
+      formData.append('name', productForm.name);
+      formData.append('description', productForm.description);
+      formData.append('price', productForm.price);
+      formData.append('offerprice', productForm.offerprice);
+      formData.append('stock', productForm.stock);
+      formData.append('image', productForm.image);
+      formData.append('categoryid', productForm.categoryid);
+      const res = await fetch(`${API_BASE_URL}/product`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setProdError(data.message || 'Failed to add product.');
+        setProdLoading(false);
+        return;
+      }
+      setProducts([...products, data.data]);
+      setProductForm({ name: '', description: '', price: '', offerprice: '', stock: '', image: null, categoryid: '' });
+      setProdLoading(false);
+    } catch (err) {
+      setProdError('Network error. Please try again.');
+      setProdLoading(false);
+    }
+  };
+
   return (
     <Layout>
-      <main className="flex-1 p-6 md:p-10 bg-transparent">
+      <main className="flex-1 p-2 md:p-10 bg-transparent">
+        {/* Tabs */}
+        <div className="flex gap-2 md:gap-4 mb-4 md:mb-8 flex-wrap">
+          <button
+            className={`flex-1 min-w-[120px] px-2 md:px-6 py-2 rounded-t-lg font-semibold border-b-4 transition-all duration-200 ${activeTab === 'categories' ? 'border-blue-600 text-blue-700 bg-white shadow' : 'border-transparent text-gray-500 bg-blue-50 hover:bg-white'}`}
+            onClick={() => setActiveTab('categories')}
+            id="categories"
+          >📂 Categories</button>
+          <button
+            className={`flex-1 min-w-[120px] px-2 md:px-6 py-2 rounded-t-lg font-semibold border-b-4 transition-all duration-200 ${activeTab === 'products' ? 'border-blue-600 text-blue-700 bg-white shadow' : 'border-transparent text-gray-500 bg-blue-50 hover:bg-white'}`}
+            onClick={() => setActiveTab('products')}
+            id="products"
+          >🛒 Products</button>
+        </div>
         {/* Category Management */}
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">Category Management</h2>
-          <form className="flex gap-3" onSubmit={handleAddCategory}>
-            <input
-              type="text"
-              placeholder="Add new category"
-              value={categoryName}
-              onChange={(e) => setCategoryName(e.target.value)}
-              className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm"
-              disabled={catLoading}
-            />
-            <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition" disabled={catLoading}>Add</button>
-          </form>
-          {catError && <div className="text-red-500 text-sm mt-2">{catError}</div>}
-        </section>
-        {/* Category Table */}
-        <section className="mb-10">
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">Categories</h3>
-          {categories.length === 0 ? (
-            <div className="text-gray-400 italic py-6 text-center bg-white rounded-xl shadow">No categories yet.</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white rounded-xl shadow">
-                <thead>
-                  <tr className="bg-blue-50">
-                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {categories.map((cat) => (
-                    <tr key={cat.id} className="border-b last:border-b-0 hover:bg-blue-50">
-                      <td className="px-6 py-3">
-                        <button
-                          className={`text-blue-600 font-semibold hover:underline${selectedCategory === cat.id ? ' underline' : ''}`}
-                          onClick={() => setSelectedCategory(cat.id)}
-                        >
-                          {cat.name}
-                        </button>
-                      </td>
-                      <td className="px-6 py-3">
-                        <button className="text-red-500 hover:text-red-700 font-medium" onClick={() => handleDeleteCategory(cat.id)}>
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-        {/* Product Table */}
-        <section>
-          {selectedCategory && (
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-blue-700 mb-4">Products in "{categories.find((c) => c.id === selectedCategory)?.name}"</h3>
-              <div className="overflow-x-auto">
-                <table className="min-w-full">
-                  <thead>
-                    <tr className="bg-blue-50">
-                      <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Price</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {demoProducts.map((prod) => (
-                      <tr key={prod.id} className="border-b last:border-b-0 hover:bg-blue-50">
-                        <td className="px-6 py-3">{prod.name}</td>
-                        <td className="px-6 py-3">{prod.price}</td>
+        {activeTab === 'categories' && (
+          <section className="mb-10" id="categories-section">
+            <h2 className="text-xl font-semibold text-gray-700 mb-4">Category Management</h2>
+            <form className="flex flex-col md:flex-row gap-3" onSubmit={handleAddCategory}>
+              <input
+                type="text"
+                placeholder="Add new category"
+                value={categoryName}
+                onChange={(e) => setCategoryName(e.target.value)}
+                className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm"
+                disabled={catLoading}
+              />
+              <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition" disabled={catLoading}>Add</button>
+            </form>
+            {catError && <div className="text-red-500 text-sm mt-2">{catError}</div>}
+            {/* Category Table */}
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">Categories</h3>
+              {categories.length === 0 ? (
+                <div className="text-gray-400 italic py-6 text-center bg-white rounded-xl shadow">No categories yet.</div>
+              ) : (
+                <div className="overflow-x-auto w-full">
+                  <table className="min-w-full bg-white rounded-xl shadow text-sm">
+                    <thead>
+                      <tr className="bg-blue-50">
+                        <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Name</th>
+                        <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {categories.map((cat) => (
+                        <tr key={cat.id} className="border-b last:border-b-0 hover:bg-blue-50">
+                          <td className="px-2 md:px-6 py-3">
+                            <button
+                              className={`text-blue-600 font-semibold hover:underline${selectedCategory === cat.id ? ' underline' : ''}`}
+                              onClick={() => setSelectedCategory(cat.id)}
+                            >
+                              {cat.name}
+                            </button>
+                          </td>
+                          <td className="px-2 md:px-6 py-3">
+                            <button className="text-red-500 hover:text-red-700 font-medium" onClick={() => handleDeleteCategory(cat.id)}>
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
-          )}
-        </section>
+          </section>
+        )}
+        {/* Product Management */}
+        {activeTab === 'products' && (
+          <section className="mb-10" id="products-section">
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">Add Product</h3>
+            <form className="flex flex-col gap-3" onSubmit={handleAddProduct} encType="multipart/form-data">
+              <div className="flex flex-col md:flex-row gap-3">
+                <input type="text" name="name" placeholder="Name" value={productForm.name} onChange={handleProductInput} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" required disabled={prodLoading} />
+                <input type="text" name="description" placeholder="Description" value={productForm.description} onChange={handleProductInput} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" required disabled={prodLoading} />
+              </div>
+              <div className="flex flex-col md:flex-row gap-3">
+                <input type="number" name="price" placeholder="Price" value={productForm.price} onChange={handleProductInput} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" required disabled={prodLoading} />
+                <input type="number" name="offerprice" placeholder="Offer Price" value={productForm.offerprice} onChange={handleProductInput} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" required disabled={prodLoading} />
+                <input type="number" name="stock" placeholder="Stock" value={productForm.stock} onChange={handleProductInput} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" required disabled={prodLoading} />
+              </div>
+              <div className="flex flex-col md:flex-row gap-3 items-center">
+                {/* Drag and Drop File Upload */}
+                <div
+                  className={`flex-1 border-2 border-dashed rounded-lg px-4 py-6 text-center cursor-pointer transition-colors ${dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'}`}
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onClick={() => document.getElementById('product-image-input').click()}
+                  style={{ minHeight: 56 }}
+                >
+                  <input
+                    id="product-image-input"
+                    type="file"
+                    name="image"
+                    accept="image/*"
+                    onChange={handleFileInput}
+                    className="hidden"
+                    required
+                    disabled={prodLoading}
+                  />
+                  {productForm.image ? (
+                    <span className="text-blue-700 font-medium">{productForm.image.name}</span>
+                  ) : (
+                    <span className="text-gray-400">Drag & drop image here, or <span className="underline">click to select</span></span>
+                  )}
+                </div>
+                <select name="categoryid" value={productForm.categoryid} onChange={handleProductInput} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" required disabled={prodLoading}>
+                  <option value="">Select Category</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+              <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition self-start md:self-auto" disabled={prodLoading}>Add Product</button>
+            </form>
+            {prodError && <div className="text-red-500 text-sm mt-2">{prodError}</div>}
+            {/* Product List */}
+            {products.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg p-6 mt-8">
+                <h3 className="text-lg font-semibold text-blue-700 mb-4">Products</h3>
+                <div className="overflow-x-auto w-full">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="bg-blue-50">
+                        <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Image</th>
+                        <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Name</th>
+                        <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Description</th>
+                        <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Price</th>
+                        <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Offer Price</th>
+                        <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Stock</th>
+                        <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Category</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {products.map((prod) => (
+                        <tr key={prod._id} className="border-b last:border-b-0 hover:bg-blue-50">
+                          <td className="px-2 md:px-6 py-3"><img src={prod.image} alt="Product" className="h-12 w-12 object-cover rounded" /></td>
+                          <td className="px-2 md:px-6 py-3">{prod.name}</td>
+                          <td className="px-2 md:px-6 py-3">{prod.description}</td>
+                          <td className="px-2 md:px-6 py-3">{prod.price}</td>
+                          <td className="px-2 md:px-6 py-3">{prod.offerprice}</td>
+                          <td className="px-2 md:px-6 py-3">{prod.stock}</td>
+                          <td className="px-2 md:px-6 py-3">{categories.find(c => c.id === prod.categoryid)?.name || prod.categoryid}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
       </main>
     </Layout>
   );
