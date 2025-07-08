@@ -324,18 +324,6 @@ function Dashboard() {
   return (
     <Layout onCategoryClick={handleSidebarCategoryClick} onProductClick={handleSidebarProductClick}>
       <main className="flex-1 p-2 md:p-10 bg-transparent relative">
-        {/* Loader Overlay */}
-        {isLoading && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-            <div className="flex flex-col items-center">
-              <svg className="animate-spin h-12 w-12 text-blue-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-              </svg>
-              <span className="text-blue-700 font-semibold text-lg">Loading...</span>
-            </div>
-          </div>
-        )}
         {/* Tabs */}
         <div className="flex gap-2 md:gap-4 mb-4 md:mb-8 flex-wrap">
           <button
@@ -351,7 +339,19 @@ function Dashboard() {
         </div>
         {/* Category Management */}
         {activeTab === 'categories' && (
-          <section className="mb-10" id="categories-section">
+          <section className="mb-10 relative" id="categories-section">
+            {/* Loader Overlay for Category Section */}
+            {catLoading && (
+              <div className="absolute inset-0 z-40 flex items-center justify-center bg-black bg-opacity-20 rounded-xl">
+                <div className="flex flex-col items-center">
+                  <svg className="animate-spin h-10 w-10 text-blue-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                  </svg>
+                  <span className="text-blue-700 font-semibold text-base">Loading...</span>
+                </div>
+              </div>
+            )}
             <h2 className="text-xl font-semibold text-gray-700 mb-4">Category Management</h2>
             <form className="flex flex-col md:flex-row gap-3" onSubmit={handleAddCategory}>
               <input
@@ -404,7 +404,19 @@ function Dashboard() {
             </div>
             {/* Product Images for Selected Category */}
             {selectedCategory && (
-              <div className="bg-white rounded-2xl shadow-lg p-6 mt-8">
+              <div className="bg-white rounded-2xl shadow-lg p-6 mt-8 relative">
+                {/* Loader Overlay for Category's Products Grid */}
+                {catLoading && (
+                  <div className="absolute inset-0 z-40 flex items-center justify-center bg-black bg-opacity-20 rounded-xl">
+                    <div className="flex flex-col items-center">
+                      <svg className="animate-spin h-10 w-10 text-blue-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                      </svg>
+                      <span className="text-blue-700 font-semibold text-base">Loading...</span>
+                    </div>
+                  </div>
+                )}
                 <h3 className="text-lg font-semibold text-blue-700 mb-4">Products in Category</h3>
                 {filteredProducts.length === 0 ? (
                   <div className="text-gray-400 italic py-6 text-center">No products in this category.</div>
@@ -441,7 +453,19 @@ function Dashboard() {
         )}
         {/* Product Management */}
         {activeTab === 'products' && (
-          <section className="mb-10" id="products-section">
+          <section className="mb-10 relative" id="products-section">
+            {/* Loader Overlay for Products Section */}
+            {(prodLoading || editLoading) && (
+              <div className="absolute inset-0 z-40 flex items-center justify-center bg-black bg-opacity-20 rounded-xl">
+                <div className="flex flex-col items-center">
+                  <svg className="animate-spin h-10 w-10 text-blue-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                  </svg>
+                  <span className="text-blue-700 font-semibold text-base">Loading...</span>
+                </div>
+              </div>
+            )}
             <h3 className="text-lg font-semibold text-gray-700 mb-2">Add Product</h3>
             <form className="flex flex-col gap-3" onSubmit={handleAddProduct} encType="multipart/form-data">
               <div className="flex flex-col md:flex-row gap-3">
