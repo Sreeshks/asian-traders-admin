@@ -1,22 +1,15 @@
-import { useNavigate } from 'react-router-dom';
+import { FaUserCircle } from 'react-icons/fa';
 
 function Header() {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    // Implement logout logic (e.g., clear JWT token)
-    navigate('/login');
-  };
-
   return (
-    <header className="bg-white shadow p-4 flex justify-between items-center">
+    <header className="bg-white shadow px-6 py-4 flex justify-between items-center w-full">
+      {/* Left - Logo */}
       <img src="/logo.png" alt="Asian Traders Logo" className="h-10" />
-      <button
-        onClick={handleLogout}
-        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-      >
-        Logout
-      </button>
+
+      {/* Right - Profile Icon */}
+      <div className="flex items-center">
+        <FaUserCircle className="text-5xl text-orange-500 cursor-pointer hover:text-orange-600" />
+      </div>
     </header>
   );
 }
