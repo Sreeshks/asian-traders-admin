@@ -14,6 +14,9 @@ function Dashboard() {
   const [prodLoading, setProdLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('categories');
   const [dragActive, setDragActive] = useState(false);
+  const [editProduct, setEditProduct] = useState(null);
+  const [editForm, setEditForm] = useState({ name: '', description: '', price: '', offerprice: '', stock: '', image: null, categoryid: '' });
+  const [editLoading, setEditLoading] = useState(false);
 
   // For demo: static products per category
   const demoProducts = [
@@ -234,6 +237,71 @@ function Dashboard() {
     }
   };
 
+  // Open edit modal and populate form
+  const handleEditProduct = (product) => {
+    setEditProduct(product);
+    setEditForm({
+      name: product.name || '',
+      description: product.description || '',
+      price: product.price || '',
+      offerprice: product.offerprice || '',
+      stock: product.stock || '',
+      image: null,
+      categoryid: product.categoryid && typeof product.categoryid === 'object' ? product.categoryid._id : product.categoryid || '',
+    });
+  };
+
+  // Handle edit form input
+  const handleEditInput = (e) => {
+    const { name, value, files } = e.target;
+    setEditForm((prev) => ({
+      ...prev,
+      [name]: files ? files[0] : value,
+    }));
+  };
+
+  // Submit edit form
+  const handleUpdateProduct = async (e) => {
+    e.preventDefault();
+    setEditLoading(true);
+    setProdError('');
+    const token = localStorage.getItem('token');
+    try {
+      const formData = new FormData();
+      Object.entries(editForm).forEach(([key, value]) => {
+        if (value !== '' && value !== null) formData.append(key, value);
+      });
+      const res = await fetch(`${API_BASE_URL}/product/${editProduct._id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setProdError(data.message || 'Failed to update product.');
+        setEditLoading(false);
+        return;
+      }
+      setProducts(products.map((p) => (p._id === data.data._id ? data.data : p)));
+      setEditProduct(null);
+      setEditLoading(false);
+    } catch (err) {
+      setProdError('Network error. Please try again.');
+      setEditLoading(false);
+    }
+  };
+
+  // Filter products by selected category
+  const filteredProducts = selectedCategory
+    ? products.filter((prod) => {
+        if (!prod.categoryid) return false;
+        if (typeof prod.categoryid === 'object') return prod.categoryid._id === selectedCategory;
+        return prod.categoryid === selectedCategory;
+      })
+    : [];
+
   // Handlers for sidebar tab switching
   const handleSidebarCategoryClick = () => {
     setActiveTab('categories');
@@ -250,9 +318,24 @@ function Dashboard() {
     }, 100);
   };
 
+  // Loader overlay
+  const isLoading = catLoading || prodLoading || editLoading;
+
   return (
     <Layout onCategoryClick={handleSidebarCategoryClick} onProductClick={handleSidebarProductClick}>
-      <main className="flex-1 p-2 md:p-10 bg-transparent">
+      <main className="flex-1 p-2 md:p-10 bg-transparent relative">
+        {/* Loader Overlay */}
+        {isLoading && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+            <div className="flex flex-col items-center">
+              <svg className="animate-spin h-12 w-12 text-blue-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+              </svg>
+              <span className="text-blue-700 font-semibold text-lg">Loading...</span>
+            </div>
+          </div>
+        )}
         {/* Tabs */}
         <div className="flex gap-2 md:gap-4 mb-4 md:mb-8 flex-wrap">
           <button
@@ -319,6 +402,41 @@ function Dashboard() {
                 </div>
               )}
             </div>
+            {/* Product Images for Selected Category */}
+            {selectedCategory && (
+              <div className="bg-white rounded-2xl shadow-lg p-6 mt-8">
+                <h3 className="text-lg font-semibold text-blue-700 mb-4">Products in Category</h3>
+                {filteredProducts.length === 0 ? (
+                  <div className="text-gray-400 italic py-6 text-center">No products in this category.</div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {filteredProducts.map((prod) => (
+                      <div key={prod._id} className="relative group">
+                        <img src={prod.image} alt={prod.name} className="h-32 w-full object-cover rounded-lg shadow" />
+                        <button
+                          className="absolute top-2 right-10 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-red-500 hover:text-white transition-opacity opacity-0 group-hover:opacity-100"
+                          title="Delete"
+                          onClick={() => handleDeleteProduct(prod._id)}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                        <button
+                          className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-blue-500 hover:text-white transition-opacity opacity-0 group-hover:opacity-100"
+                          title="Edit"
+                          onClick={() => handleEditProduct(prod)}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a4 4 0 01-1.414.828l-4 1a1 1 0 001.213 1.213l1-4a4 4 0 01.828-1.414z" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </section>
         )}
         {/* Product Management */}
@@ -371,16 +489,16 @@ function Dashboard() {
               <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition self-start md:self-auto" disabled={prodLoading}>Add Product</button>
             </form>
             {prodError && <div className="text-red-500 text-sm mt-2">{prodError}</div>}
-            {/* Product Images Grid */}
+            {/* Product Images Grid (all products) */}
             {products.length > 0 && (
               <div className="bg-white rounded-2xl shadow-lg p-6 mt-8">
-                <h3 className="text-lg font-semibold text-blue-700 mb-4">Products</h3>
+                <h3 className="text-lg font-semibold text-blue-700 mb-4">All Products</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                   {products.map((prod) => (
                     <div key={prod._id} className="relative group">
                       <img src={prod.image} alt={prod.name} className="h-32 w-full object-cover rounded-lg shadow" />
                       <button
-                        className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-red-500 hover:text-white transition-opacity opacity-0 group-hover:opacity-100"
+                        className="absolute top-2 right-10 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-red-500 hover:text-white transition-opacity opacity-0 group-hover:opacity-100"
                         title="Delete"
                         onClick={() => handleDeleteProduct(prod._id)}
                       >
@@ -388,8 +506,42 @@ function Dashboard() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
+                      <button
+                        className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-blue-500 hover:text-white transition-opacity opacity-0 group-hover:opacity-100"
+                        title="Edit"
+                        onClick={() => handleEditProduct(prod)}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a4 4 0 01-1.414.828l-4 1a1 1 0 001.213 1.213l1-4a4 4 0 01.828-1.414z" />
+                        </svg>
+                      </button>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+            {/* Edit Product Modal */}
+            {editProduct && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md relative">
+                  <button className="absolute top-2 right-2 text-gray-400 hover:text-blue-600 text-2xl" onClick={() => setEditProduct(null)} aria-label="Close">×</button>
+                  <h3 className="text-lg font-semibold text-blue-700 mb-4">Edit Product</h3>
+                  <form className="flex flex-col gap-3" onSubmit={handleUpdateProduct} encType="multipart/form-data">
+                    <input type="text" name="name" placeholder="Name" value={editForm.name} onChange={handleEditInput} className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" required disabled={editLoading} />
+                    <input type="text" name="description" placeholder="Description" value={editForm.description} onChange={handleEditInput} className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" required disabled={editLoading} />
+                    <input type="number" name="price" placeholder="Price" value={editForm.price} onChange={handleEditInput} className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" required disabled={editLoading} />
+                    <input type="number" name="offerprice" placeholder="Offer Price" value={editForm.offerprice} onChange={handleEditInput} className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" required disabled={editLoading} />
+                    <input type="number" name="stock" placeholder="Stock" value={editForm.stock} onChange={handleEditInput} className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" required disabled={editLoading} />
+                    <select name="categoryid" value={editForm.categoryid} onChange={handleEditInput} className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" required disabled={editLoading}>
+                      <option value="">Select Category</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
+                    </select>
+                    <input type="file" name="image" accept="image/*" onChange={handleEditInput} className="" disabled={editLoading} />
+                    <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition" disabled={editLoading}>Update Product</button>
+                  </form>
+                  {prodError && <div className="text-red-500 text-sm mt-2">{prodError}</div>}
                 </div>
               </div>
             )}
