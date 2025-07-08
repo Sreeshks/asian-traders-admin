@@ -176,8 +176,82 @@ function Dashboard() {
     }
   };
 
+  // Fetch products from API
+  const fetchProducts = async () => {
+    setProdError('');
+    setProdLoading(true);
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`${API_BASE_URL}/product`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setProdError(data.message || 'Failed to fetch products.');
+        setProdLoading(false);
+        return;
+      }
+      setProducts(data.data);
+      setProdLoading(false);
+    } catch (err) {
+      setProdError('Network error. Please try again.');
+      setProdLoading(false);
+    }
+  };
+
+  // Fetch products when tab is switched to 'products'
+  useEffect(() => {
+    if (activeTab === 'products') {
+      fetchProducts();
+    }
+  }, [activeTab]);
+
+  // Delete product handler
+  const handleDeleteProduct = async (id) => {
+    setProdError('');
+    setProdLoading(true);
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`${API_BASE_URL}/product/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setProdError(data.message || 'Failed to delete product.');
+        setProdLoading(false);
+        return;
+      }
+      setProducts(products.filter((prod) => prod._id !== id));
+      setProdLoading(false);
+    } catch (err) {
+      setProdError('Network error. Please try again.');
+      setProdLoading(false);
+    }
+  };
+
+  // Handlers for sidebar tab switching
+  const handleSidebarCategoryClick = () => {
+    setActiveTab('categories');
+    setTimeout(() => {
+      const el = document.getElementById('categories-section');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+  const handleSidebarProductClick = () => {
+    setActiveTab('products');
+    setTimeout(() => {
+      const el = document.getElementById('products-section');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
   return (
-    <Layout>
+    <Layout onCategoryClick={handleSidebarCategoryClick} onProductClick={handleSidebarProductClick}>
       <main className="flex-1 p-2 md:p-10 bg-transparent">
         {/* Tabs */}
         <div className="flex gap-2 md:gap-4 mb-4 md:mb-8 flex-wrap">
@@ -297,37 +371,25 @@ function Dashboard() {
               <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition self-start md:self-auto" disabled={prodLoading}>Add Product</button>
             </form>
             {prodError && <div className="text-red-500 text-sm mt-2">{prodError}</div>}
-            {/* Product List */}
+            {/* Product Images Grid */}
             {products.length > 0 && (
               <div className="bg-white rounded-2xl shadow-lg p-6 mt-8">
                 <h3 className="text-lg font-semibold text-blue-700 mb-4">Products</h3>
-                <div className="overflow-x-auto w-full">
-                  <table className="min-w-full text-sm">
-                    <thead>
-                      <tr className="bg-blue-50">
-                        <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Image</th>
-                        <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Name</th>
-                        <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Description</th>
-                        <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Price</th>
-                        <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Offer Price</th>
-                        <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Stock</th>
-                        <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Category</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {products.map((prod) => (
-                        <tr key={prod._id} className="border-b last:border-b-0 hover:bg-blue-50">
-                          <td className="px-2 md:px-6 py-3"><img src={prod.image} alt="Product" className="h-12 w-12 object-cover rounded" /></td>
-                          <td className="px-2 md:px-6 py-3">{prod.name}</td>
-                          <td className="px-2 md:px-6 py-3">{prod.description}</td>
-                          <td className="px-2 md:px-6 py-3">{prod.price}</td>
-                          <td className="px-2 md:px-6 py-3">{prod.offerprice}</td>
-                          <td className="px-2 md:px-6 py-3">{prod.stock}</td>
-                          <td className="px-2 md:px-6 py-3">{categories.find(c => c.id === prod.categoryid)?.name || prod.categoryid}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  {products.map((prod) => (
+                    <div key={prod._id} className="relative group">
+                      <img src={prod.image} alt={prod.name} className="h-32 w-full object-cover rounded-lg shadow" />
+                      <button
+                        className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-red-500 hover:text-white transition-opacity opacity-0 group-hover:opacity-100"
+                        title="Delete"
+                        onClick={() => handleDeleteProduct(prod._id)}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

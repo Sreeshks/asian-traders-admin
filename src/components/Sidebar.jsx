@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
-export default function Sidebar() {
+export default function Sidebar({ onCategoryClick, onProductClick }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -26,8 +26,8 @@ export default function Sidebar() {
             </div>
             <nav className="flex flex-col gap-4">
               <NavLink to="/dashboard" className={({ isActive }) => `flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 font-medium ${isActive ? 'text-blue-700' : 'text-gray-700'}`} onClick={() => setOpen(false)}><span>🏠</span>Dashboard</NavLink>
-              <a href="#categories" className="flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700" onClick={() => setOpen(false)}><span>📂</span>Categories</a>
-              <a href="#products" className="flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700" onClick={() => setOpen(false)}><span>🛒</span>Products</a>
+              <button type="button" className="flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700" onClick={() => { setOpen(false); onCategoryClick && onCategoryClick(); }}><span>📂</span>Categories</button>
+              <button type="button" className="flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700" onClick={() => { setOpen(false); onProductClick && onProductClick(); }}><span>🛒</span>Products</button>
             </nav>
             <div className="mt-auto text-xs text-gray-400 font-semibold">&copy; {new Date().getFullYear()} Urban Edge Interior</div>
           </aside>
@@ -41,8 +41,8 @@ export default function Sidebar() {
         </div>
         <nav className="flex flex-col gap-4">
           <NavLink to="/dashboard" className={({ isActive }) => `flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 font-medium ${isActive ? 'text-blue-700' : 'text-gray-700'}`}><span>🏠</span>Dashboard</NavLink>
-          <a href="#categories" className="flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700"><span>📂</span>Categories</a>
-          <a href="#products" className="flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700"><span>🛒</span>Products</a>
+          <button type="button" className="flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700" onClick={onCategoryClick}><span>📂</span>Categories</button>
+          <button type="button" className="flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700" onClick={onProductClick}><span>🛒</span>Products</button>
         </nav>
         <div className="mt-auto text-xs text-gray-400 font-semibold">&copy; {new Date().getFullYear()} Urban Edge Interior</div>
       </aside>
