@@ -12,11 +12,15 @@ function Dashboard() {
   const [productForm, setProductForm] = useState({ name: '', description: '', price: '', offerprice: '', stock: '', image: null, categoryid: '' });
   const [prodError, setProdError] = useState('');
   const [prodLoading, setProdLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('categories');
+  // const [activeTab, setActiveTab] = useState('categories');
+  const [activeTab, setActiveTab] = useState('dashboard'); // instead of 'categories'
+
   const [dragActive, setDragActive] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
   const [editForm, setEditForm] = useState({ name: '', description: '', price: '', offerprice: '', stock: '', image: null, categoryid: '' });
   const [editLoading, setEditLoading] = useState(false);
+  //for tabs in dashboard
+  const [dashboardCategory, setDashboardCategory] = useState('all');
 
   // For demo: static products per category
   const demoProducts = [
@@ -206,10 +210,11 @@ function Dashboard() {
 
   // Fetch products when tab is switched to 'products'
   useEffect(() => {
-    if (activeTab === 'products') {
+    if (activeTab === 'products' || activeTab === 'dashboard') {
       fetchProducts();
     }
   }, [activeTab]);
+
 
   // Delete product handler
   const handleDeleteProduct = async (id) => {
@@ -296,10 +301,10 @@ function Dashboard() {
   // Filter products by selected category
   const filteredProducts = selectedCategory
     ? products.filter((prod) => {
-        if (!prod.categoryid) return false;
-        if (typeof prod.categoryid === 'object') return prod.categoryid._id === selectedCategory;
-        return prod.categoryid === selectedCategory;
-      })
+      if (!prod.categoryid) return false;
+      if (typeof prod.categoryid === 'object') return prod.categoryid._id === selectedCategory;
+      return prod.categoryid === selectedCategory;
+    })
     : [];
 
   // Handlers for sidebar tab switching
@@ -325,7 +330,15 @@ function Dashboard() {
     <Layout onCategoryClick={handleSidebarCategoryClick} onProductClick={handleSidebarProductClick}>
       <main className="flex-1 p-2 md:p-10 bg-transparent relative">
         {/* Tabs */}
-        <div className="flex gap-2 md:gap-4 mb-4 md:mb-8 flex-wrap">
+        {/* <div className="flex gap-2 md:gap-4 mb-4 md:mb-8 flex-wrap">
+          <button
+            className={`flex-1 min-w-[120px] px-2 md:px-6 py-2 rounded-t-lg font-semibold border-b-4 transition-all duration-200 ${activeTab === 'dashboard' ? 'border-blue-600 text-blue-700 bg-white shadow' : 'border-transparent text-gray-500 bg-blue-50 hover:bg-white'}`}
+            onClick={() => setActiveTab('dashboard')}
+            id="dashboard"
+          >
+            🏠 Dashboard
+          </button>
+
           <button
             className={`flex-1 min-w-[120px] px-2 md:px-6 py-2 rounded-t-lg font-semibold border-b-4 transition-all duration-200 ${activeTab === 'categories' ? 'border-blue-600 text-blue-700 bg-white shadow' : 'border-transparent text-gray-500 bg-blue-50 hover:bg-white'}`}
             onClick={() => setActiveTab('categories')}
@@ -336,7 +349,92 @@ function Dashboard() {
             onClick={() => setActiveTab('products')}
             id="products"
           >🛒 Products</button>
-        </div>
+        </div> */}
+        {/* Dashboard  */}
+        {activeTab === 'dashboard' && (
+          <section className="mb-10" id="dashboard-section">
+            {/* Category Tabs */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              <button
+                className={`px-4 py-1.5 rounded-lg font-semibold border transition ${dashboardCategory === 'all'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-blue-100'
+                  }`}
+                onClick={() => setDashboardCategory('all')}
+              >
+                All
+              </button>
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  className={`px-4 py-1.5 rounded-lg font-semibold border transition ${dashboardCategory === cat.id
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-blue-100'
+                    }`}
+                  onClick={() => setDashboardCategory(cat.id)}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+
+            <h2 className="text-xl font-semibold text-gray-700 mb-4">Dashboard Overview</h2>
+            {prodLoading ? (
+              <div className="flex justify-center items-center py-10">
+                <span className="text-blue-600 font-semibold">Loading products...</span>
+              </div>
+            ) : products.length === 0 ? (
+              <div className="text-gray-400 italic py-6 text-center bg-white rounded-xl shadow">No products available.</div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 bg-white rounded-xl p-4 shadow">
+                {products
+                  .filter((prod) => {
+                    return (
+                      dashboardCategory === 'all' ||
+                      (typeof prod.categoryid === 'object'
+                        ? prod.categoryid._id === dashboardCategory
+                        : prod.categoryid === dashboardCategory)
+                    );
+                  })
+                  .map((prod) => (
+                    <div key={prod._id} className="relative group">
+                      <img
+                        src={prod.image}
+                        alt={prod.name}
+                        className="h-32 w-full object-cover rounded-lg shadow"
+                      />
+                      {/* Product name below image */}
+                      <p className="text-sm font-medium text-center mt-1 text-gray-700 truncate">
+                        {prod.name}
+                      </p>
+
+                      <button
+                        className="absolute top-2 right-10 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-red-500 hover:text-white transition-opacity opacity-0 group-hover:opacity-100"
+                        title="Delete"
+                        onClick={() => handleDeleteProduct(prod._id)}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                      <button
+                        className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-blue-500 hover:text-white transition-opacity opacity-0 group-hover:opacity-100"
+                        title="Edit"
+                        onClick={() => handleEditProduct(prod)}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a4 4 0 01-1.414.828l-4 1a1 1 0 001.213 1.213l1-4a4 4 0 01.828-1.414z" />
+                        </svg>
+                      </button>
+                    </div>
+
+                  ))}
+              </div>
+
+            )}
+          </section>
+        )}
+
         {/* Category Management */}
         {activeTab === 'categories' && (
           <section className="mb-10 relative" id="categories-section">
@@ -520,7 +618,16 @@ function Dashboard() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                   {products.map((prod) => (
                     <div key={prod._id} className="relative group">
-                      <img src={prod.image} alt={prod.name} className="h-32 w-full object-cover rounded-lg shadow" />
+                      <img
+                        src={prod.image}
+                        alt={prod.name}
+                        className="h-32 w-full object-cover rounded-lg shadow"
+                      />
+                      {/* Product name below image */}
+                      <p className="text-sm font-medium text-center mt-1 text-gray-700 truncate">
+                        {prod.name}
+                      </p>
+
                       <button
                         className="absolute top-2 right-10 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-red-500 hover:text-white transition-opacity opacity-0 group-hover:opacity-100"
                         title="Delete"
@@ -540,6 +647,7 @@ function Dashboard() {
                         </svg>
                       </button>
                     </div>
+
                   ))}
                 </div>
               </div>
