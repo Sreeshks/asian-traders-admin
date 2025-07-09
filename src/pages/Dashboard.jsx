@@ -62,7 +62,7 @@ function Dashboard() {
       setCatLoading(true);
       const token = localStorage.getItem('token');
       try {
-        const res = await fetch(`${API_BASE_URL}/category/category/${deleteDialog.id}`, {
+        const res = await fetch(`${API_BASE_URL}/category/${deleteDialog.id}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -173,32 +173,6 @@ function Dashboard() {
     }
   };
 
-  const handleDeleteCategory = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this category?')) return;
-    setCatError('');
-    setCatLoading(true);
-    const token = localStorage.getItem('token');
-    try {
-      const res = await fetch(`${API_BASE_URL}/category/category/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        setCatError(data.message || 'Failed to delete category.');
-        setCatLoading(false);
-        return;
-      }
-    setCategories(categories.filter((cat) => cat.id !== id));
-    if (selectedCategory === id) setSelectedCategory(null);
-      setCatLoading(false);
-    } catch (err) {
-      setCatError('Network error. Please try again.');
-      setCatLoading(false);
-    }
-  };
 
   const handleProductInput = (e) => {
     const { name, value, files } = e.target;
