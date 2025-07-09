@@ -12,50 +12,44 @@ function Dashboard() {
   const [productForm, setProductForm] = useState({ name: '', description: '', price: '', offerprice: '', stock: '', image: null, categoryid: '' });
   const [prodError, setProdError] = useState('');
   const [prodLoading, setProdLoading] = useState(false);
-  // const [activeTab, setActiveTab] = useState('categories');
-  const [activeTab, setActiveTab] = useState('dashboard'); // instead of 'categories'
-
+  
+  const [activeTab, setActiveTab] = useState('dashboard'); 
   const [dragActive, setDragActive] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
   const [editForm, setEditForm] = useState({ name: '', description: '', price: '', offerprice: '', stock: '', image: null, categoryid: '' });
   const [editLoading, setEditLoading] = useState(false);
-  //for tabs in dashboard
+
   const [dashboardCategory, setDashboardCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [categorySearch, setCategorySearch] = useState('');
 
-  // Filtered categories for search
+
   const filteredCategories = categories.filter(cat =>
     cat.name.toLowerCase().includes(categorySearch.toLowerCase())
   );
 
-  // Filter products by search query and category
+
   const filteredDashboardProducts = products
     .filter((prod) => {
-      // First filter by category
+  
       const categoryMatch = dashboardCategory === 'all' ||
         (typeof prod.categoryid === 'object'
           ? prod.categoryid._id === dashboardCategory
           : prod.categoryid === dashboardCategory);
-      
-      // Then filter by search query
       const searchMatch = prod.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          prod.description.toLowerCase().includes(searchQuery.toLowerCase());
       
       return categoryMatch && searchMatch;
     });
 
-  // For floating add button
+
   const [showAddInput, setShowAddInput] = useState(false);
 
-  // For custom delete confirmation
   const [deleteDialog, setDeleteDialog] = useState({ open: false, type: '', id: null });
 
-  // Open delete dialog for category or product
   const openDeleteDialog = (type, id) => setDeleteDialog({ open: true, type, id });
   const closeDeleteDialog = () => setDeleteDialog({ open: false, type: '', id: null });
 
-  // Confirm delete handler
   const handleConfirmDelete = async () => {
     if (deleteDialog.type === 'category') {
       setCatError('');
@@ -242,7 +236,6 @@ function Dashboard() {
     }
   };
 
-  // Fetch products from API
   const fetchProducts = async () => {
     setProdError('');
     setProdLoading(true);
@@ -267,7 +260,6 @@ function Dashboard() {
     }
   };
 
-  // Fetch products when tab is switched to 'products'
   useEffect(() => {
     if (activeTab === 'products' || activeTab === 'dashboard') {
       fetchProducts();
@@ -275,7 +267,6 @@ function Dashboard() {
   }, [activeTab]);
 
 
-  // No longer used directly for confirmation, handled by custom dialog
 
   // Open edit modal and populate form
   const handleEditProduct = (product) => {
@@ -291,7 +282,6 @@ function Dashboard() {
     });
   };
 
-  // Handle edit form input
   const handleEditInput = (e) => {
     const { name, value, files } = e.target;
     setEditForm((prev) => ({
@@ -300,7 +290,6 @@ function Dashboard() {
     }));
   };
 
-  // Submit edit form
   const handleUpdateProduct = async (e) => {
     e.preventDefault();
     setEditLoading(true);
@@ -333,7 +322,6 @@ function Dashboard() {
     }
   };
 
-  // Filter products by selected category
   const filteredProducts = selectedCategory
     ? products.filter((prod) => {
       if (!prod.categoryid) return false;
@@ -342,7 +330,6 @@ function Dashboard() {
     })
     : [];
 
-  // Handlers for sidebar tab switching
   const handleSidebarDashboardClick = () => {
     setActiveTab('dashboard');
     setTimeout(() => {
@@ -365,7 +352,6 @@ function Dashboard() {
     }, 100);
   };
 
-  // Loader overlay
   const isLoading = catLoading || prodLoading || editLoading;
 
   return (
