@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
-export default function Sidebar({ onCategoryClick, onProductClick }) {
+export default function Sidebar({ onDashboardClick, onCategoryClick, onProductClick }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -19,13 +19,13 @@ export default function Sidebar({ onCategoryClick, onProductClick }) {
         <div className="fixed inset-0 z-50 flex">
           <div className="bg-black bg-opacity-40 w-full h-full" onClick={() => setOpen(false)}></div>
           <aside className="w-64 bg-white shadow-lg rounded-r-3xl p-6 flex flex-col gap-8 h-full relative animate-slideInLeft border-l-4 border-blue-500">
-            <button className="absolute top-4 right-4 text-gray-400 hover:text-blue-600 text-2xl" onClick={() => setOpen(false)} aria-label="Close menu">×</button>
+            <button className="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-2xl font-bold transition-colors duration-200 z-10" onClick={() => setOpen(false)} aria-label="Close menu">×</button>
             <div className="flex items-center gap-3 mb-8">
-              <span className="text-3xl font-extrabold text-blue-700 tracking-tight">UEI</span>
+              <img src="/logo/logo.jpeg" alt="Urban Edge Interior Logo" className="h-12 w-12 rounded-full object-cover shadow" />
               <span className="text-lg font-bold text-gray-800 tracking-wide">Urban Edge Interior</span>
             </div>
             <nav className="flex flex-col gap-4">
-              <NavLink to="/dashboard" className={({ isActive }) => `flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 font-medium ${isActive ? 'text-blue-700' : 'text-gray-700'}`} onClick={() => setOpen(false)}><span>🏠</span>Dashboard</NavLink>
+              <button type="button" className="flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700 font-medium" onClick={() => { setOpen(false); onDashboardClick && onDashboardClick(); }}><span>🏠</span>Dashboard</button>
               <button type="button" className="flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700" onClick={() => { setOpen(false); onCategoryClick && onCategoryClick(); }}><span>📂</span>Categories</button>
               <button type="button" className="flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700" onClick={() => { setOpen(false); onProductClick && onProductClick(); }}><span>🛒</span>Products</button>
             </nav>
@@ -36,11 +36,11 @@ export default function Sidebar({ onCategoryClick, onProductClick }) {
       {/* Desktop Sidebar */}
       <aside className="w-64 bg-white shadow-lg rounded-r-3xl p-6 flex flex-col gap-8 hidden md:flex border-l-4 border-blue-500">
         <div className="flex items-center gap-3 mb-8">
-          <span className="text-3xl font-extrabold text-blue-700 tracking-tight">UEI</span>
+          <img src="/logo/logo.jpeg" alt="Urban Edge Interior Logo" className="h-12 w-12 rounded-full object-cover shadow" />
           <span className="text-lg font-bold text-gray-800 tracking-wide">Urban Edge Interior</span>
         </div>
         <nav className="flex flex-col gap-4">
-          <NavLink to="/dashboard" className={({ isActive }) => `flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 font-medium ${isActive ? 'text-blue-700' : 'text-gray-700'}`}><span>🏠</span>Dashboard</NavLink>
+          <button type="button" className="flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700 font-medium" onClick={onDashboardClick}><span>🏠</span>Dashboard</button>
           <button type="button" className="flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700" onClick={onCategoryClick}><span>📂</span>Categories</button>
           <button type="button" className="flex items-center gap-2 text-left px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700" onClick={onProductClick}><span>🛒</span>Products</button>
         </nav>

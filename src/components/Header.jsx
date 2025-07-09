@@ -4,8 +4,8 @@ export default function Header() {
   return (
     <header className="bg-white shadow flex items-center justify-between px-4 md:px-8 py-4">
       <div className="flex items-center gap-3">
-        <span className="text-2xl font-extrabold text-blue-700 tracking-tight">UEI</span>
-        <h1 className="text-2xl md:text-3xl font-bold text-blue-700 tracking-tight">Urban Edge Interior Admin Dashboard</h1>
+     
+        <h1 className="text-2xl md:text-3xl font-bold text-blue-700 tracking-tight">Admin Dashboard</h1>
       </div>
       <div className="flex items-center gap-4">
         <span className="text-gray-600 font-medium">Welcome, Admin</span>
