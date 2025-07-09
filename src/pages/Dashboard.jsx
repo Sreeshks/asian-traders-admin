@@ -161,11 +161,11 @@ function Dashboard() {
         setCatLoading(false);
         return;
       }
-      setCategories([
-        ...categories,
+    setCategories([
+      ...categories,
         { id: data.data._id, name: data.data.name },
-      ]);
-      setCategoryName('');
+    ]);
+    setCategoryName('');
       setCatLoading(false);
     } catch (err) {
       setCatError('Network error. Please try again.');
@@ -191,8 +191,8 @@ function Dashboard() {
         setCatLoading(false);
         return;
       }
-      setCategories(categories.filter((cat) => cat.id !== id));
-      if (selectedCategory === id) setSelectedCategory(null);
+    setCategories(categories.filter((cat) => cat.id !== id));
+    if (selectedCategory === id) setSelectedCategory(null);
       setCatLoading(false);
     } catch (err) {
       setCatError('Network error. Please try again.');
@@ -301,32 +301,7 @@ function Dashboard() {
   }, [activeTab]);
 
 
-  // Delete product handler
-  const handleDeleteProduct = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) return;
-    setProdError('');
-    setProdLoading(true);
-    const token = localStorage.getItem('token');
-    try {
-      const res = await fetch(`${API_BASE_URL}/product/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        setProdError(data.message || 'Failed to delete product.');
-        setProdLoading(false);
-        return;
-      }
-      setProducts(products.filter((prod) => prod._id !== id));
-      setProdLoading(false);
-    } catch (err) {
-      setProdError('Network error. Please try again.');
-      setProdLoading(false);
-    }
-  };
+  // No longer used directly for confirmation, handled by custom dialog
 
   // Open edit modal and populate form
   const handleEditProduct = (product) => {
@@ -508,12 +483,12 @@ function Dashboard() {
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="w-6 h-6 bg-white rounded-full"></div>
-                    </div>
-                  </div>
+          </div>
+          </div>
                   <p className="text-blue-600 font-semibold mt-4 text-lg">Loading products...</p>
                   <p className="text-gray-500 text-sm mt-1">Please wait while we fetch your products</p>
-                </div>
-              </div>
+          </div>
+        </div>
             ) : filteredDashboardProducts.length === 0 ? (
               <div className="text-gray-400 italic py-6 text-center bg-white rounded-xl shadow">
                 {searchQuery ? 'No products found matching your search.' : 'No products available.'}
@@ -535,7 +510,7 @@ function Dashboard() {
                     <button
                       className="absolute top-2 right-10 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-red-500 hover:text-white transition-opacity opacity-0 group-hover:opacity-100"
                       title="Delete"
-                      onClick={() => handleDeleteProduct(prod._id)}
+                      onClick={() => openDeleteDialog('product', prod._id)}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -604,25 +579,25 @@ function Dashboard() {
               {/* Add Category Input (inline on desktop, floating on mobile) */}
               {(showAddInput || window.innerWidth >= 768) && (
                 <form className="flex flex-col md:flex-row gap-3 mb-2 animate-fadeIn" onSubmit={handleAddCategory}>
-                  <input
-                    type="text"
-                    placeholder="Add new category"
-                    value={categoryName}
-                    onChange={(e) => setCategoryName(e.target.value)}
+            <input
+              type="text"
+              placeholder="Add new category"
+              value={categoryName}
+              onChange={(e) => setCategoryName(e.target.value)}
                     className="flex-1 px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-400 outline-none shadow-md"
                     disabled={catLoading}
-                  />
+            />
                   <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-xl font-semibold shadow hover:bg-blue-700 transition" disabled={catLoading}>Add</button>
                   {window.innerWidth < 768 && (
                     <button type="button" className="text-gray-400 px-4 py-2 rounded-xl hover:bg-gray-100 transition" onClick={() => setShowAddInput(false)}>Cancel</button>
                   )}
-                </form>
+          </form>
               )}
               {catError && <div className="text-red-500 text-sm mt-2">{catError}</div>}
               <hr className="my-4 border-blue-100" />
-              {/* Category Table */}
+        {/* Category Table */}
               <div className="mt-4">
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">Categories</h3>
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">Categories</h3>
                 {catLoading ? (
                   <div className="flex justify-center items-center py-10">
                     <div className="flex flex-col items-center">
@@ -638,36 +613,36 @@ function Dashboard() {
                 ) : (
                   <div className="overflow-x-auto w-full">
                     <table className="min-w-full bg-white rounded-xl shadow text-sm">
-                      <thead>
-                        <tr className="bg-blue-50">
+                <thead>
+                  <tr className="bg-blue-50">
                           <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Name</th>
                           <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                  </tr>
+                </thead>
+                <tbody>
                         {filteredCategories.map((cat, idx) => (
                           <tr key={cat.id} className="border-b last:border-b-0 hover:bg-blue-50 transition-colors animate-fadeIn" style={{ animationDelay: `${idx * 40}ms` }}>
                             <td className="px-2 md:px-6 py-3">
                               <span className={`inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-semibold text-xs shadow-sm`}>{cat.name}</span>
-                            </td>
+                      </td>
                             <td className="px-2 md:px-6 py-3">
                               <button className="text-red-500 hover:text-white hover:bg-red-500 font-medium transition-colors px-3 py-1 rounded-full shadow-sm relative group" onClick={() => openDeleteDialog('category', cat.id)} disabled={catLoading} title="Delete category">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                                 <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1 text-xs bg-black bg-opacity-80 text-white rounded px-2 py-1 opacity-0 group-hover:opacity-100 pointer-events-none transition-all">Delete</span>
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
               </div>
             </div>
             {/* Product Images for Selected Category */}
-            {selectedCategory && (
+          {selectedCategory && (
               <div className="bg-white rounded-2xl shadow-lg p-6 mt-8 relative">
                 {/* Loader Overlay for Category's Products Grid */}
                 {catLoading && (
@@ -692,7 +667,7 @@ function Dashboard() {
                         <button
                           className="absolute top-2 right-10 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-red-500 hover:text-white transition-opacity opacity-0 group-hover:opacity-100"
                           title="Delete"
-                          onClick={() => handleDeleteProduct(prod._id)}
+                          onClick={() => openDeleteDialog('product', prod._id)}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -807,7 +782,7 @@ function Dashboard() {
                       <button
                         className="absolute top-2 right-10 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-red-500 hover:text-white transition-opacity opacity-0 group-hover:opacity-100"
                         title="Delete"
-                        onClick={() => handleDeleteProduct(prod._id)}
+                        onClick={() => openDeleteDialog('product', prod._id)}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -825,15 +800,15 @@ function Dashboard() {
                     </div>
 
                   ))}
-                </div>
               </div>
-            )}
-          </section>
+            </div>
+          )}
+        </section>
         )}
       </main>
       {/* Edit Product Modal - Moved outside sections to work from all tabs */}
       {editProduct && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-100 bg-opacity-80 backdrop-blur-[6px]">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white bg-opacity-70 backdrop-blur-lg">
           <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg mx-4 relative transform transition-all duration-300 scale-100 animate-fadeIn">
             {/* Close button */}
             <button 
@@ -1003,7 +978,7 @@ function Dashboard() {
       )}
       {/* Custom Delete Confirmation Dialog */}
       {deleteDialog.open && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white bg-opacity-10 backdrop-blur-2xl">
           <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-xs mx-4 relative animate-fadeIn">
             <div className="flex flex-col items-center text-center">
               <div className="bg-red-100 rounded-full p-3 mb-4">
