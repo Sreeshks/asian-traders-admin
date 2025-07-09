@@ -48,6 +48,70 @@ function Dashboard() {
   // For floating add button
   const [showAddInput, setShowAddInput] = useState(false);
 
+  // For custom delete confirmation
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, type: '', id: null });
+
+  // Open delete dialog for category or product
+  const openDeleteDialog = (type, id) => setDeleteDialog({ open: true, type, id });
+  const closeDeleteDialog = () => setDeleteDialog({ open: false, type: '', id: null });
+
+  // Confirm delete handler
+  const handleConfirmDelete = async () => {
+    if (deleteDialog.type === 'category') {
+      setCatError('');
+      setCatLoading(true);
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch(`${API_BASE_URL}/category/category/${deleteDialog.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          setCatError(data.message || 'Failed to delete category.');
+          setCatLoading(false);
+          closeDeleteDialog();
+          return;
+        }
+        setCategories(categories.filter((cat) => cat.id !== deleteDialog.id));
+        if (selectedCategory === deleteDialog.id) setSelectedCategory(null);
+        setCatLoading(false);
+        closeDeleteDialog();
+      } catch (err) {
+        setCatError('Network error. Please try again.');
+        setCatLoading(false);
+        closeDeleteDialog();
+      }
+    } else if (deleteDialog.type === 'product') {
+      setProdError('');
+      setProdLoading(true);
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch(`${API_BASE_URL}/product/${deleteDialog.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          setProdError(data.message || 'Failed to delete product.');
+          setProdLoading(false);
+          closeDeleteDialog();
+          return;
+        }
+        setProducts(products.filter((prod) => prod._id !== deleteDialog.id));
+        setProdLoading(false);
+        closeDeleteDialog();
+      } catch (err) {
+        setProdError('Network error. Please try again.');
+        setProdLoading(false);
+        closeDeleteDialog();
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -587,7 +651,7 @@ function Dashboard() {
                               <span className={`inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-semibold text-xs shadow-sm`}>{cat.name}</span>
                             </td>
                             <td className="px-2 md:px-6 py-3">
-                              <button className="text-red-500 hover:text-white hover:bg-red-500 font-medium transition-colors px-3 py-1 rounded-full shadow-sm relative group" onClick={() => handleDeleteCategory(cat.id)} disabled={catLoading} title="Delete category">
+                              <button className="text-red-500 hover:text-white hover:bg-red-500 font-medium transition-colors px-3 py-1 rounded-full shadow-sm relative group" onClick={() => openDeleteDialog('category', cat.id)} disabled={catLoading} title="Delete category">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
@@ -684,8 +748,8 @@ function Dashboard() {
               </div>
               <div className="flex flex-col md:flex-row gap-3">
                 <input type="number" name="price" placeholder="Price" value={productForm.price} onChange={handleProductInput} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" required disabled={prodLoading} />
-                <input type="number" name="offerprice" placeholder="Offer Price" value={productForm.offerprice} onChange={handleProductInput} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" required disabled={prodLoading} />
-                <input type="number" name="stock" placeholder="Stock" value={productForm.stock} onChange={handleProductInput} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" required disabled={prodLoading} />
+                <input type="number" name="offerprice" placeholder="Offer Price (optional)" value={productForm.offerprice} onChange={handleProductInput} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" disabled={prodLoading} />
+                <input type="number" name="stock" placeholder="Stock (optional)" value={productForm.stock} onChange={handleProductInput} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" disabled={prodLoading} />
               </div>
               <div className="flex flex-col md:flex-row gap-3 items-center">
                 {/* Drag and Drop File Upload */}
@@ -934,6 +998,41 @@ function Dashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Custom Delete Confirmation Dialog */}
+      {deleteDialog.open && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-xs mx-4 relative animate-fadeIn">
+            <div className="flex flex-col items-center text-center">
+              <div className="bg-red-100 rounded-full p-3 mb-4">
+                <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">Confirm Deletion</h3>
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to delete this {deleteDialog.type === 'category' ? 'category' : 'product'}?
+                <br />This action cannot be undone.
+              </p>
+              <div className="flex gap-3 w-full">
+                <button
+                  className="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200"
+                  onClick={closeDeleteDialog}
+                  disabled={catLoading || prodLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleConfirmDelete}
+                  disabled={catLoading || prodLoading}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
