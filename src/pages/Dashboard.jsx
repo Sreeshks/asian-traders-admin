@@ -31,32 +31,39 @@ function Dashboard() {
   );
 
 
-  const filteredDashboardProducts = products
-    .filter((prod) => {
+  const filteredDashboardProducts = products.filter((prod) => {
+    const categoryMatch =
+      dashboardCategory === 'all' || prod.categoryid === dashboardCategory;
+    const searchMatch =
+      prod.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      prod.description.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const categoryMatch = dashboardCategory === 'all' ||
-        (typeof prod.categoryid === 'object'
-          ? prod.categoryid._id === dashboardCategory
-          : prod.categoryid === dashboardCategory);
-      const searchMatch = prod.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        prod.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return categoryMatch && searchMatch;
+  });
 
-      return categoryMatch && searchMatch;
-    });
 
 
   const [showAddInput, setShowAddInput] = useState(false);
 
-  const [deleteDialog, setDeleteDialog] = useState({ open: false, type: '', id: null });
+  const [deleteDialog, setDeleteDialog] = useState({
+    open: false,
+    type: '',
+    id: null,
+    deleteProducts: true // default to true
+  });
 
-  const openDeleteDialog = (type, id) => setDeleteDialog({ open: true, type, id });
+  const openDeleteDialog = (type, id) => setDeleteDialog({
+    open: true, type, id, deleteProducts: true, // default value, can change based on user choice in dialog
+  });
   const closeDeleteDialog = () => setDeleteDialog({ open: false, type: '', id: null });
 
   const handleConfirmDelete = async () => {
+    const token = localStorage.getItem('token');
+
     if (deleteDialog.type === 'category') {
       setCatError('');
       setCatLoading(true);
-      const token = localStorage.getItem('token');
+
       try {
         const res = await fetch(`${API_BASE_URL}/category/${deleteDialog.id}`, {
           method: 'DELETE',
@@ -64,26 +71,65 @@ function Dashboard() {
             'Authorization': `Bearer ${token}`,
           },
         });
+
         const data = await res.json();
         if (!res.ok || !data.success) {
           setCatError(data.message || 'Failed to delete category.');
-          setCatLoading(false);
-          closeDeleteDialog();
           return;
         }
-        setCategories(categories.filter((cat) => cat.id !== deleteDialog.id));
+
+        // Remove category from local state
+        setCategories(prev => prev.filter(cat => cat.id !== deleteDialog.id));
         if (selectedCategory === deleteDialog.id) setSelectedCategory(null);
-        setCatLoading(false);
-        closeDeleteDialog();
+
+        // Handle associated products
+        if (deleteDialog.deleteProducts) {
+          // Remove products belonging to the deleted category
+          setProducts(prev =>
+            prev.filter(prod => {
+              const catId = typeof prod.categoryid === 'object' ? prod.categoryid._id : prod.categoryid;
+              return catId !== deleteDialog.id;
+            })
+          );
+        } else {
+          // Reassign products to 'uncategorized'
+          const updatedProducts = await Promise.all(
+            products.map(async (prod) => {
+              const catId = typeof prod.categoryid === 'object' ? prod.categoryid._id : prod.categoryid;
+              if (catId !== deleteDialog.id) return prod;
+
+              try {
+                const formData = new FormData();
+                formData.append('categoryid', 'uncategorized'); // or null
+
+                const updateRes = await fetch(`${API_BASE_URL}/product/${prod._id}`, {
+                  method: 'PATCH',
+                  headers: {
+                    'Authorization': `Bearer ${token}`,
+                  },
+                  body: formData,
+                });
+
+                const updateData = await updateRes.json();
+                return updateRes.ok && updateData.success ? updateData.data : prod;
+              } catch {
+                return prod; // fallback
+              }
+            })
+          );
+          setProducts(updatedProducts);
+        }
       } catch (err) {
         setCatError('Network error. Please try again.');
+      } finally {
         setCatLoading(false);
         closeDeleteDialog();
       }
+
     } else if (deleteDialog.type === 'product') {
       setProdError('');
       setProdLoading(true);
-      const token = localStorage.getItem('token');
+
       try {
         const res = await fetch(`${API_BASE_URL}/product/${deleteDialog.id}`, {
           method: 'DELETE',
@@ -91,23 +137,24 @@ function Dashboard() {
             'Authorization': `Bearer ${token}`,
           },
         });
+
         const data = await res.json();
         if (!res.ok || !data.success) {
           setProdError(data.message || 'Failed to delete product.');
-          setProdLoading(false);
-          closeDeleteDialog();
           return;
         }
-        setProducts(products.filter((prod) => prod._id !== deleteDialog.id));
-        setProdLoading(false);
-        closeDeleteDialog();
+
+        // Remove product from local state
+        setProducts(prev => prev.filter(prod => prod._id !== deleteDialog.id));
       } catch (err) {
         setProdError('Network error. Please try again.');
+      } finally {
         setProdLoading(false);
         closeDeleteDialog();
       }
     }
   };
+
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -157,11 +204,11 @@ function Dashboard() {
         setCatLoading(false);
         return;
       }
-    setCategories([
-      ...categories,
+      setCategories([
+        ...categories,
         { id: data.data._id, name: data.data.name },
-    ]);
-    setCategoryName('');
+      ]);
+      setCategoryName('');
       setCatLoading(false);
       // Focus the input after adding
       if (addCategoryInputRef.current) {
@@ -258,13 +305,24 @@ function Dashboard() {
         setProdLoading(false);
         return;
       }
-      setProducts(data.data);
+
+      // Normalize categoryid to string
+      const normalizedProducts = data.data.map((prod) => ({
+        ...prod,
+        categoryid:
+          typeof prod.categoryid === 'object' && prod.categoryid !== null
+            ? prod.categoryid._id
+            : prod.categoryid,
+      }));
+
+      setProducts(normalizedProducts);
       setProdLoading(false);
     } catch (err) {
       setProdError('Network error. Please try again.');
       setProdLoading(false);
     }
   };
+
 
   useEffect(() => {
     if (activeTab === 'products' || activeTab === 'dashboard') {
@@ -437,12 +495,12 @@ function Dashboard() {
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="w-6 h-6 bg-white rounded-full"></div>
-          </div>
-          </div>
+                    </div>
+                  </div>
                   <p className="text-blue-600 font-semibold mt-4 text-lg">Loading products...</p>
                   <p className="text-gray-500 text-sm mt-1">Please wait while we fetch your products</p>
-          </div>
-        </div>
+                </div>
+              </div>
             ) : filteredDashboardProducts.length === 0 ? (
               <div className="text-gray-400 italic py-6 text-center bg-white rounded-xl shadow">
                 {searchQuery ? 'No products found matching your search.' : 'No products available.'}
@@ -698,18 +756,47 @@ function Dashboard() {
       {/* Custom Delete Confirmation Dialog */}
       {deleteDialog.open && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white bg-opacity-10 backdrop-blur-2xl">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-xs mx-4 relative animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm mx-4 relative animate-fadeIn">
             <div className="flex flex-col items-center text-center">
               <div className="bg-red-100 rounded-full p-3 mb-4">
                 <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </div>
+
               <h3 className="text-xl font-bold text-gray-800 mb-2">Confirm Deletion</h3>
-              <p className="text-gray-600 mb-6">
-                Are you sure you want to delete this {deleteDialog.type === 'category' ? 'category' : 'product'}?
-                <br />This action cannot be undone.
-              </p>
+
+              {deleteDialog.type === 'category' && activeTab === 'categories' ? (
+                <>
+                  <p className="text-gray-600 mb-4">
+                    This category may have products. Do you want to delete them too?<br />
+                    <span className="text-red-500 font-medium">This action cannot be undone.</span>
+                  </p>
+
+                  <div className="mb-4 w-full flex flex-col items-start gap-2">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={deleteDialog.deleteProducts || false}
+                        onChange={() =>
+                          setDeleteDialog(prev => ({
+                            ...prev,
+                            deleteProducts: !prev.deleteProducts
+                          }))
+                        }
+                        className="accent-red-500"
+                      />
+                      <span className="text-sm text-gray-700">Also delete all products in this category</span>
+                    </label>
+                  </div>
+                </>
+              ) : (
+                <p className="text-gray-600 mb-6">
+                  Are you sure you want to delete this {deleteDialog.type}?<br />
+                  <span className="text-red-500 font-medium">This action cannot be undone.</span>
+                </p>
+              )}
+
               <div className="flex gap-3 w-full">
                 <button
                   className="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200"
@@ -730,6 +817,7 @@ function Dashboard() {
           </div>
         </div>
       )}
+
     </Layout>
   );
 }
