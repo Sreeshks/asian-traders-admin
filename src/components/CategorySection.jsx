@@ -1,7 +1,6 @@
-// File: src/pages/CategoryManagement.jsx
 import React from 'react';
 
-function CategoryManagement({
+export default function CategorySection({
   categorySearch,
   setCategorySearch,
   categoryName,
@@ -15,39 +14,43 @@ function CategoryManagement({
   openDeleteDialog,
   selectedCategory,
   filteredProducts,
-  handleEditProduct
+  handleEditProduct,
+  addCategoryInputRef
 }) {
   return (
     <section className="mb-10 relative" id="categories-section">
       <div className="bg-gradient-to-br from-blue-50 via-white to-blue-100 rounded-2xl shadow-2xl p-6 mb-8 relative overflow-hidden">
+        {/* Accent bar and title */}
         <div className="flex items-center gap-3 mb-4">
           <div className="w-1.5 h-8 bg-blue-600 rounded-full mr-2"></div>
           <h2 className="text-2xl font-extrabold text-blue-700 tracking-tight">Category Management</h2>
         </div>
-
-        <div className="mb-4 relative">
-          <input
-            type="text"
-            placeholder="Search categories..."
-            value={categorySearch}
-            onChange={e => setCategorySearch(e.target.value)}
-            className="w-full px-4 py-3 pl-10 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-400 outline-none shadow-md transition-all duration-200"
-          />
-          <svg
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-blue-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+        {/* Category Search Bar */}
+        <div className="mb-4">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search categories..."
+              value={categorySearch}
+              onChange={e => setCategorySearch(e.target.value)}
+              className="w-full px-4 py-3 pl-10 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-400 outline-none shadow-md transition-all duration-200"
             />
-          </svg>
+            <svg
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-blue-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
         </div>
-
+        {/* Add Category Floating Button (mobile) */}
         <button
           type="button"
           className="md:hidden fixed bottom-8 right-8 z-50 bg-blue-600 text-white rounded-full shadow-lg w-14 h-14 flex items-center justify-center text-3xl hover:bg-blue-700 transition-all duration-200"
@@ -57,7 +60,7 @@ function CategoryManagement({
         >
           +
         </button>
-
+        {/* Add Category Input (inline on desktop, floating on mobile) */}
         {(showAddInput || window.innerWidth >= 768) && (
           <form className="flex flex-col md:flex-row gap-3 mb-2 animate-fadeIn" onSubmit={handleAddCategory}>
             <input
@@ -67,6 +70,7 @@ function CategoryManagement({
               onChange={(e) => setCategoryName(e.target.value)}
               className="flex-1 px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-400 outline-none shadow-md"
               disabled={catLoading}
+              ref={addCategoryInputRef}
             />
             <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-xl font-semibold shadow hover:bg-blue-700 transition" disabled={catLoading}>Add</button>
             {window.innerWidth < 768 && (
@@ -75,9 +79,8 @@ function CategoryManagement({
           </form>
         )}
         {catError && <div className="text-red-500 text-sm mt-2">{catError}</div>}
-
         <hr className="my-4 border-blue-100" />
-
+        {/* Category Table */}
         <div className="mt-4">
           <h3 className="text-lg font-semibold text-gray-700 mb-2">Categories</h3>
           {catLoading ? (
@@ -123,9 +126,10 @@ function CategoryManagement({
           )}
         </div>
       </div>
-
+      {/* Product Images for Selected Category */}
       {selectedCategory && (
         <div className="bg-white rounded-2xl shadow-lg p-6 mt-8 relative">
+          {/* Loader Overlay for Category's Products Grid */}
           {catLoading && (
             <div className="absolute inset-0 z-40 flex items-center justify-center bg-black bg-opacity-20 rounded-xl">
               <div className="flex flex-col items-center">
@@ -171,6 +175,4 @@ function CategoryManagement({
       )}
     </section>
   );
-}
-
-export default CategoryManagement;
+} 
