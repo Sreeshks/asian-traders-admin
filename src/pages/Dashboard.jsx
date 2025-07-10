@@ -357,28 +357,8 @@ function Dashboard() {
   return (
     <Layout onDashboardClick={handleSidebarDashboardClick} onCategoryClick={handleSidebarCategoryClick} onProductClick={handleSidebarProductClick}>
       <main className="flex-1 p-2 md:p-10 bg-transparent relative">
-        {/* Tabs */}
-        {/* <div className="flex gap-2 md:gap-4 mb-4 md:mb-8 flex-wrap">
-          <button
-            className={`flex-1 min-w-[120px] px-2 md:px-6 py-2 rounded-t-lg font-semibold border-b-4 transition-all duration-200 ${activeTab === 'dashboard' ? 'border-blue-600 text-blue-700 bg-white shadow' : 'border-transparent text-gray-500 bg-blue-50 hover:bg-white'}`}
-            onClick={() => setActiveTab('dashboard')}
-            id="dashboard"
-          >
-            🏠 Dashboard
-          </button>
-
-          <button
-            className={`flex-1 min-w-[120px] px-2 md:px-6 py-2 rounded-t-lg font-semibold border-b-4 transition-all duration-200 ${activeTab === 'categories' ? 'border-blue-600 text-blue-700 bg-white shadow' : 'border-transparent text-gray-500 bg-blue-50 hover:bg-white'}`}
-            onClick={() => setActiveTab('categories')}
-            id="categories"
-          >📂 Categories</button>
-          <button
-            className={`flex-1 min-w-[120px] px-2 md:px-6 py-2 rounded-t-lg font-semibold border-b-4 transition-all duration-200 ${activeTab === 'products' ? 'border-blue-600 text-blue-700 bg-white shadow' : 'border-transparent text-gray-500 bg-blue-50 hover:bg-white'}`}
-            onClick={() => setActiveTab('products')}
-            id="products"
-          >🛒 Products</button>
-        </div> */}
-        {/* Dashboard  */}
+        
+         
         {activeTab === 'dashboard' && (
           <section className="mb-10" id="dashboard-section">
             {/* Search Bar */}
