@@ -65,6 +65,7 @@ function Dashboard() {
       setCatLoading(true);
 
       try {
+        // 1. Delete the category itself
         const res = await fetch(`${API_BASE_URL}/category/${deleteDialog.id}`, {
           method: 'DELETE',
           headers: {
@@ -75,6 +76,7 @@ function Dashboard() {
         const data = await res.json();
         if (!res.ok || !data.success) {
           setCatError(data.message || 'Failed to delete category.');
+          setCatLoading(false);
           return;
         }
 
@@ -84,7 +86,20 @@ function Dashboard() {
 
         // Handle associated products
         if (deleteDialog.deleteProducts) {
-          // Remove products belonging to the deleted category
+          // Call the new API to delete all products in this category
+          const prodRes = await fetch(`${API_BASE_URL}/product/deletebycategory/${deleteDialog.id}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          const prodData = await prodRes.json();
+          if (!prodRes.ok || !prodData.success) {
+            setCatError(prodData.message || 'Failed to delete products in this category.');
+            setCatLoading(false);
+            return;
+          }
+          // Remove products belonging to the deleted category from local state
           setProducts(prev =>
             prev.filter(prod => {
               const catId = typeof prod.categoryid === 'object' ? prod.categoryid._id : prod.categoryid;
@@ -141,6 +156,7 @@ function Dashboard() {
         const data = await res.json();
         if (!res.ok || !data.success) {
           setProdError(data.message || 'Failed to delete product.');
+          setProdLoading(false);
           return;
         }
 
