@@ -52,30 +52,38 @@ export default function ProductSection({
           <input type="number" name="offerprice" placeholder="Offer Price (optional)" value={productForm.offerprice} onChange={handleProductInput} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" disabled={prodLoading} />
           <input type="number" name="stock" placeholder="Stock (optional)" value={productForm.stock} onChange={handleProductInput} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" disabled={prodLoading} />
         </div>
-        <div className="flex flex-col md:flex-row gap-3 items-center">
+        <div className="flex flex-col md:flex-row gap-3 items-start">
           {/* Drag and Drop File Upload */}
-          <div
-            className={`flex-1 border-2 border-dashed rounded-lg px-4 py-6 text-center cursor-pointer transition-colors ${dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'}`}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onClick={() => document.getElementById('product-image-input').click()}
-            style={{ minHeight: 56 }}
-          >
-            <input
-              id="product-image-input"
-              type="file"
-              name="image"
-              accept="image/*"
-              onChange={handleFileInput}
-              className="hidden"
-              required
-              disabled={prodLoading}
-            />
-            {productForm.image ? (
-              <span className="text-blue-700 font-medium">{productForm.image.name}</span>
-            ) : (
-              <span className="text-gray-400">Drag & drop image here, or <span className="underline">click to select</span></span>
+          <div className="flex-1 flex flex-col">
+            <div
+              className={`border-2 border-dashed rounded-lg px-4 py-6 text-center cursor-pointer transition-colors ${dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'}`}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onClick={() => document.getElementById('product-image-input').click()}
+              style={{ minHeight: 56 }}
+            >
+              <input
+                id="product-image-input"
+                type="file"
+                name="image"
+                accept="image/*"
+                onChange={handleFileInput}
+                className="hidden"
+                disabled={prodLoading}
+              />
+              {productForm.image ? (
+                <span className="text-blue-700 font-medium">{productForm.image.name}</span>
+              ) : (
+                <span className="text-gray-400">Drag & drop image here, or <span className="underline">click to select</span></span>
+              )}
+            </div>
+
+            {/* ✅ Error below box */}
+            {prodError && (
+              <div className="text-red-500 text-sm mt-2">
+                {prodError}
+              </div>
             )}
           </div>
           <select name="categoryid" value={productForm.categoryid} onChange={handleProductInput} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" required disabled={prodLoading}>
@@ -87,7 +95,7 @@ export default function ProductSection({
         </div>
         <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition self-start md:self-auto" disabled={prodLoading}>Add Product</button>
       </form>
-      {prodError && <div className="text-red-500 text-sm mt-2">{prodError}</div>}
+
       {/* Product Images Grid (all products) */}
       {products.length > 0 && (
         <div className="bg-white rounded-2xl shadow-lg p-6 mt-8">

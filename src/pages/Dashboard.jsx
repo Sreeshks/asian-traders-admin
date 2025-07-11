@@ -271,6 +271,10 @@ function Dashboard() {
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
+    if (!productForm.image) {
+      setProdError("Please upload an image for the product.");
+      return;
+    }
     setProdError('');
     setProdLoading(true);
     const token = localStorage.getItem('token');
