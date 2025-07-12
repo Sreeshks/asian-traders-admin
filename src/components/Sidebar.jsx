@@ -167,7 +167,7 @@ export default function Sidebar({ onDashboardClick, onCategoryClick, onProductCl
       {/* Desktop Sidebar */}
       <aside className="w-64 bg-white shadow-xl rounded-r-3xl p-6 flex flex-col gap-8 hidden md:flex border-l-4 border-blue-500">
                  {/* Header */}
-         <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-8">
            <img src="/logo/logo.jpeg" alt="Urban Edge Interior Logo" className="h-12 w-12 rounded-2xl object-cover shadow-lg" />
            <div>
              <h1 className="text-xl font-bold text-gray-800 tracking-wide">Urban Edge Interior</h1>
@@ -213,10 +213,10 @@ export default function Sidebar({ onDashboardClick, onCategoryClick, onProductCl
               <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
-            </div>
+      </div>
             <span className="font-semibold">Products</span>
           </button>
-        </nav>
+      </nav>
 
         {/* Footer */}
         <div className="mt-auto">
@@ -235,7 +235,7 @@ export default function Sidebar({ onDashboardClick, onCategoryClick, onProductCl
             &copy; {new Date().getFullYear()} Admin Panel
           </div>
         </div>
-      </aside>
+    </aside>
     </>
   );
 } 
