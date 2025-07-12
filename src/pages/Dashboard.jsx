@@ -221,11 +221,11 @@ function Dashboard() {
         setCatLoading(false);
         return;
       }
-      setCategories([
-        ...categories,
+    setCategories([
+      ...categories,
         { id: data.data._id, name: data.data.name },
-      ]);
-      setCategoryName('');
+    ]);
+    setCategoryName('');
       setCatLoading(false);
       // Focus the input after adding
       if (addCategoryInputRef.current) {
@@ -589,12 +589,12 @@ function Dashboard() {
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="w-6 h-6 bg-white rounded-full"></div>
-                    </div>
-                  </div>
+          </div>
+          </div>
                   <p className="text-blue-600 font-semibold mt-4 text-lg">Loading products...</p>
                   <p className="text-gray-500 text-sm mt-1">Please wait while we fetch your products</p>
-                </div>
-              </div>
+          </div>
+        </div>
             ) : filteredDashboardProducts.length === 0 ? (
               <div className="text-gray-400 italic py-6 text-center bg-white rounded-xl shadow">
                 {searchQuery ? 'No products found matching your search.' : 'No products available.'}
@@ -675,9 +675,9 @@ function Dashboard() {
                     </div>
                   </div>
                 ))}
-              </div>
-            )}
-          </section>
+            </div>
+          )}
+        </section>
         )}
 
         {/* Dashboard Product Detail Modal */}
