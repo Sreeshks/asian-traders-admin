@@ -273,11 +273,26 @@ function Dashboard() {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       // Check if the drop target is for main image or secondary images
       const target = e.target.closest('[data-upload-type]');
       if (target && target.dataset.uploadType === 'main') {
         setProductForm((prev) => ({ ...prev, image: e.dataTransfer.files[0] }));
+      } else if (target && target.dataset.uploadType === 'secondary') {
+        // Handle secondary images drop
+        const newFiles = Array.from(e.dataTransfer.files);
+        setProductForm((prev) => {
+          const prevFiles = prev.secondary_images || [];
+          // Only add files that are not already in prevFiles (by name and size)
+          const uniqueFiles = newFiles.filter(
+            nf => !prevFiles.some(pf => pf.name === nf.name && pf.size === nf.size)
+          );
+          const combined = [...prevFiles, ...uniqueFiles].slice(0, 3);
+          return {
+            ...prev,
+            secondary_images: combined,
+          };
+        });
       }
     }
   };
