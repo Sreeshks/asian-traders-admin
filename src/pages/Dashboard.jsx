@@ -389,7 +389,7 @@ function Dashboard() {
 
 
   useEffect(() => {
-    if (activeTab === 'products' || activeTab === 'dashboard') {
+    if (activeTab === 'products' || activeTab === 'dashboard' || activeTab === 'categories') {
       fetchProducts();
     }
   }, [activeTab]);
@@ -804,6 +804,7 @@ function Dashboard() {
             filteredCategories={filteredCategories}
             openDeleteDialog={openDeleteDialog}
             selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
             filteredProducts={filteredProducts}
             handleEditProduct={handleEditProduct}
             addCategoryInputRef={addCategoryInputRef}
