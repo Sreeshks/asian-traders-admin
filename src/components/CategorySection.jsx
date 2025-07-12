@@ -16,7 +16,9 @@ export default function CategorySection({
   setSelectedCategory,
   filteredProducts,
   handleEditProduct,
-  addCategoryInputRef
+  addCategoryInputRef,
+  products, // 👈 ADD THIS
+
 }) {
   return (
     <section className="mb-10 relative" id="categories-section">
@@ -25,7 +27,7 @@ export default function CategorySection({
         {/* Decorative Elements */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full opacity-20 -translate-y-16 translate-x-16"></div>
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-100 rounded-full opacity-30 translate-y-12 -translate-x-12"></div>
-        
+
         {/* Title and Description */}
         <div className="relative z-10">
           <div className="flex items-center gap-4 mb-6">
@@ -86,9 +88,9 @@ export default function CategorySection({
                   </svg>
                 </div>
               </div>
-              <button 
-                type="submit" 
-                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-semibold shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" 
+              <button
+                type="submit"
+                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-semibold shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 disabled={catLoading}
               >
                 {catLoading ? (
@@ -176,13 +178,12 @@ export default function CategorySection({
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredCategories.map((cat, idx) => (
-              <div 
-                key={cat.id} 
-                className={`bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 p-6 border-2 ${
-                  selectedCategory === cat.id 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-100 hover:border-blue-200'
-                }`}
+              <div
+                key={cat.id}
+                className={`bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 p-6 border-2 ${selectedCategory === cat.id
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-100 hover:border-blue-200'
+                  }`}
                 style={{ animationDelay: `${idx * 100}ms` }}
               >
                 {/* Category Header */}
@@ -192,7 +193,7 @@ export default function CategorySection({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
                   </div>
-                  <button 
+                  <button
                     className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all duration-200"
                     onClick={() => openDeleteDialog('category', cat.id)}
                     disabled={catLoading}
@@ -214,7 +215,8 @@ export default function CategorySection({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
                     <span className="text-sm text-gray-600">
-                      {filteredProducts.filter(prod => {
+                      {products.filter(prod => {
+
                         const catId = typeof prod.categoryid === 'object' ? prod.categoryid._id : prod.categoryid;
                         return catId === cat.id;
                       }).length} products
@@ -227,28 +229,27 @@ export default function CategorySection({
                   )}
                 </div>
 
-                                 {/* Action Buttons */}
-                 <div className="flex gap-2">
-                   <button
-                     className={`flex-1 px-4 py-2 rounded-xl font-semibold transition-all duration-200 ${
-                       selectedCategory === cat.id
-                         ? 'bg-blue-600 text-white hover:bg-blue-700'
-                         : 'bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700'
-                     }`}
-                     onClick={() => {
-                       // Toggle selection
-                       if (selectedCategory === cat.id) {
-                         // Deselect
-                         setSelectedCategory(null);
-                       } else {
-                         // Select
-                         setSelectedCategory(cat.id);
-                       }
-                     }}
-                   >
-                     {selectedCategory === cat.id ? 'Viewing' : 'View Products'}
-                   </button>
-                 </div>
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <button
+                    className={`flex-1 px-4 py-2 rounded-xl font-semibold transition-all duration-200 ${selectedCategory === cat.id
+                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700'
+                      }`}
+                    onClick={() => {
+                      // Toggle selection
+                      if (selectedCategory === cat.id) {
+                        // Deselect
+                        setSelectedCategory(null);
+                      } else {
+                        // Select
+                        setSelectedCategory(cat.id);
+                      }
+                    }}
+                  >
+                    {selectedCategory === cat.id ? 'Viewing' : 'View Products'}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -267,14 +268,14 @@ export default function CategorySection({
                 {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
               </p>
             </div>
-                         <button
-               onClick={() => setSelectedCategory(null)}
-               className="px-4 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
-             >
-               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-               </svg>
-             </button>
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className="px-4 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
           {filteredProducts.length === 0 ? (
@@ -290,20 +291,20 @@ export default function CategorySection({
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {filteredProducts.map((prod, idx) => (
-                <div 
-                  key={prod._id} 
+                <div
+                  key={prod._id}
                   className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
                   style={{ animationDelay: `${idx * 50}ms` }}
                 >
                   <div className="relative">
-                    <img 
-                      src={prod.image} 
-                      alt={prod.name} 
-                      className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300" 
+                    <img
+                      src={prod.image}
+                      alt={prod.name}
+                      className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                    
+
                     {/* Action Buttons */}
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center gap-2">
+                    <div className="absolute inset-0 pointer-events-none">
                       <button
                         className="p-2 bg-white rounded-full shadow-lg hover:bg-red-500 hover:text-white transition-all duration-200 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0"
                         title="Delete"
@@ -324,7 +325,7 @@ export default function CategorySection({
                       </button>
                     </div>
                   </div>
-                  
+
                   {/* Product Info */}
                   <div className="p-3">
                     <h5 className="font-semibold text-gray-800 text-sm truncate mb-1">{prod.name}</h5>
