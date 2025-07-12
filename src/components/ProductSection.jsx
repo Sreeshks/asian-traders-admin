@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function ProductSection({
   prodLoading,
@@ -19,6 +19,9 @@ export default function ProductSection({
   prodError
 }) {
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [categorySearch, setCategorySearch] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const categoryDropdownRef = useRef(null);
 
   const handleProductClick = (product) => {
     setSelectedProduct(product);
@@ -32,6 +35,35 @@ export default function ProductSection({
   const createImagePreview = (file) => {
     return URL.createObjectURL(file);
   };
+
+  // Filter categories based on search
+  const filteredCategories = categories.filter(cat =>
+    cat.name.toLowerCase().includes(categorySearch.toLowerCase())
+  );
+
+  // Handle category selection
+  const handleCategorySelect = (categoryId, categoryName) => {
+    setProductForm(prev => ({
+      ...prev,
+      categoryid: categoryId
+    }));
+    setCategorySearch(categoryName);
+    setShowCategoryDropdown(false);
+  };
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
+        setShowCategoryDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <section className="mb-10 relative" id="products-section">
@@ -131,12 +163,91 @@ export default function ProductSection({
             </div>
           </div>
           
-          <select name="categoryid" value={productForm.categoryid} onChange={handleProductInput} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm" required disabled={prodLoading}>
-            <option value="">Select Category</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
-            ))}
-          </select>
+          {/* Category Selection with Search */}
+          <div className="flex-1 relative" ref={categoryDropdownRef}>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search and select category..."
+                value={categorySearch}
+                onChange={(e) => {
+                  setCategorySearch(e.target.value);
+                  setShowCategoryDropdown(true);
+                }}
+                onFocus={() => setShowCategoryDropdown(true)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm"
+                disabled={prodLoading}
+              />
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+              
+              {/* Category Dropdown */}
+              {showCategoryDropdown && (
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {/* Search within dropdown */}
+                  <div className="p-3 border-b border-gray-200">
+                    <div className="relative">
+                      <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <input
+                        type="text"
+                        placeholder="Search categories..."
+                        value={categorySearch}
+                        onChange={(e) => setCategorySearch(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none"
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Category List */}
+                  <div className="py-1">
+                    {filteredCategories.length > 0 ? (
+                      filteredCategories.map((cat) => (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => handleCategorySelect(cat.id, cat.name)}
+                          className="w-full px-4 py-2 text-left hover:bg-blue-50 focus:bg-blue-50 focus:outline-none transition-colors"
+                        >
+                          <span className="text-gray-700">{cat.name}</span>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-4 py-2 text-gray-500 text-sm">
+                        No categories found
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Selected Category Display */}
+            {productForm.categoryid && (
+              <div className="mt-2 flex items-center gap-2">
+                <span className="text-xs text-gray-500">Selected:</span>
+                <span className="text-sm font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                  {categories.find(cat => cat.id === productForm.categoryid)?.name}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProductForm(prev => ({ ...prev, categoryid: '' }));
+                    setCategorySearch('');
+                  }}
+                  className="text-red-500 hover:text-red-700 text-xs"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Secondary Images Upload */}
