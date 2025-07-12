@@ -700,31 +700,34 @@ function Dashboard() {
               </div>
 
               {/* Product Images */}
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold text-gray-700 mb-4">Product Images</h4>
+              <div className="mb-8">
+                <h4 className="text-xl font-semibold text-gray-700 mb-6">Product Images</h4>
                 
                 {/* Main Image */}
-                <div className="mb-4">
-                  <h5 className="text-sm font-medium text-gray-600 mb-2">Main Image</h5>
-                  <img
-                    src={selectedDashboardProduct.image}
-                    alt={selectedDashboardProduct.name}
-                    className="h-48 w-full object-cover rounded-lg shadow-lg"
-                  />
+                <div className="mb-6">
+                  <h5 className="text-lg font-medium text-gray-600 mb-4">Main Image</h5>
+                  <div className="flex justify-center">
+                    <img
+                      src={selectedDashboardProduct.image}
+                      alt={selectedDashboardProduct.name}
+                      className="max-w-full max-h-96 object-contain rounded-lg shadow-lg"
+                    />
+                  </div>
                 </div>
 
                 {/* Secondary Images */}
                 {selectedDashboardProduct.secondary_images && selectedDashboardProduct.secondary_images.length > 0 && (
                   <div>
-                    <h5 className="text-sm font-medium text-gray-600 mb-2">Additional Images</h5>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <h5 className="text-lg font-medium text-gray-600 mb-4">Additional Images</h5>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                       {selectedDashboardProduct.secondary_images.map((image, index) => (
-                        <img
-                          key={index}
-                          src={image}
-                          alt={`${selectedDashboardProduct.name} - Image ${index + 1}`}
-                          className="h-32 w-full object-cover rounded-lg shadow"
-                        />
+                        <div key={index} className="flex justify-center">
+                          <img
+                            src={image}
+                            alt={`${selectedDashboardProduct.name} - Image ${index + 1}`}
+                            className="max-w-full max-h-64 object-contain rounded-lg shadow-md"
+                          />
+                        </div>
                       ))}
                     </div>
                   </div>
