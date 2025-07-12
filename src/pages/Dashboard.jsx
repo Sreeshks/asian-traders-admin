@@ -823,6 +823,8 @@ function Dashboard() {
             filteredProducts={filteredProducts}
             handleEditProduct={handleEditProduct}
             addCategoryInputRef={addCategoryInputRef}
+              products={products}
+
           />
         )}
         {/* Product Management */}
