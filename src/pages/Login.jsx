@@ -36,7 +36,7 @@ export default function Login() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify({ email: data.email, role: data.role, _id: data._id }));
       setLoading(false);
-      navigate('/dashboard');
+    navigate('/dashboard');
     } catch (err) {
       setError('Network error. Please try again.');
       setLoading(false);
