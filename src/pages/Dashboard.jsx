@@ -680,9 +680,9 @@ function Dashboard() {
                       {/* Price Info */}
                       <div className="flex items-center justify-between">
                         <div>
-                          <span className="text-lg font-bold text-blue-600">${prod.price}</span>
+                          <span className="text-lg font-bold text-blue-600">₹{prod.price}</span>
                           {prod.offerprice && (
-                            <span className="text-sm text-green-600 ml-2">${prod.offerprice}</span>
+                            <span className="text-sm text-green-600 ml-2">₹{prod.offerprice}</span>
                           )}
                         </div>
                         <span className="text-xs text-gray-500">Stock: {prod.stock || 0}</span>
@@ -756,12 +756,12 @@ function Dashboard() {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Price:</span>
-                      <span className="font-semibold">${selectedDashboardProduct.price}</span>
+                      <span className="font-semibold">₹{selectedDashboardProduct.price}</span>
                     </div>
                     {selectedDashboardProduct.offerprice && (
                       <div className="flex justify-between">
                         <span className="text-gray-600">Offer Price:</span>
-                        <span className="font-semibold text-green-600">${selectedDashboardProduct.offerprice}</span>
+                        <span className="font-semibold text-green-600">₹{selectedDashboardProduct.offerprice}</span>
                       </div>
                     )}
                     {selectedDashboardProduct.stock && (

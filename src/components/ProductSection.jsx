@@ -439,9 +439,9 @@ export default function ProductSection({
                   {/* Price Info */}
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-lg font-bold text-blue-600">${prod.price}</span>
+                      <span className="text-lg font-bold text-blue-600">₹{prod.price}</span>
                       {prod.offerprice && (
-                        <span className="text-sm text-green-600 ml-2">${prod.offerprice}</span>
+                        <span className="text-sm text-green-600 ml-2">₹{prod.offerprice}</span>
                       )}
                     </div>
                     <span className="text-xs text-gray-500">Stock: {prod.stock || 0}</span>
@@ -514,12 +514,12 @@ export default function ProductSection({
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600 font-medium">Price:</span>
-                    <span className="text-2xl font-bold text-blue-600">${selectedProduct.price}</span>
+                    <span className="text-2xl font-bold text-blue-600">₹{selectedProduct.price}</span>
                   </div>
                   {selectedProduct.offerprice && (
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600 font-medium">Offer Price:</span>
-                      <span className="text-xl font-bold text-green-600">${selectedProduct.offerprice}</span>
+                      <span className="text-xl font-bold text-green-600">₹{selectedProduct.offerprice}</span>
                     </div>
                   )}
                   {selectedProduct.stock && (
