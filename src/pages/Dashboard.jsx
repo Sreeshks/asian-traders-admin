@@ -21,6 +21,16 @@ function Dashboard() {
   const [editForm, setEditForm] = useState({ name: '', description: '', price: '', offerprice: '', stock: '', image: null, secondary_images: [], categoryid: '' });
   const [editLoading, setEditLoading] = useState(false);
 
+  const [banners, setBanners] = useState([]);
+  const [bannerLoading, setBannerLoading] = useState(false);
+  const [bannerError, setBannerError] = useState('');
+  const [bannerImages, setBannerImages] = useState([]); // File list for upload
+
+  const [mobileBanners, setMobileBanners] = useState([]);
+  const [mobileBannerLoading, setMobileBannerLoading] = useState(false);
+  const [mobileBannerError, setMobileBannerError] = useState('');
+  const [mobileBannerImages, setMobileBannerImages] = useState([]); // File list for mobile upload
+
   const [dashboardCategory, setDashboardCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [categorySearch, setCategorySearch] = useState('');
@@ -169,6 +179,54 @@ function Dashboard() {
         setProdLoading(false);
         closeDeleteDialog();
       }
+    } else if (deleteDialog.type === 'banner') {
+      setBannerError('');
+      setBannerLoading(true);
+      try {
+        const res = await fetch(`${API_BASE_URL}/banner/${deleteDialog.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          setBannerError(data.message || 'Failed to delete banner.');
+          setBannerLoading(false);
+          return;
+        }
+        // Remove banner from local state
+        setBanners((prev) => prev.filter((b) => b._id !== deleteDialog.id));
+      } catch (err) {
+        setBannerError('Network error. Please try again.');
+      } finally {
+        setBannerLoading(false);
+        closeDeleteDialog();
+      }
+    } else if (deleteDialog.type === 'mobilebanner') {
+      setMobileBannerError('');
+      setMobileBannerLoading(true);
+      try {
+        const res = await fetch(`${API_BASE_URL}/mobilebanner/${deleteDialog.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          setMobileBannerError(data.message || 'Failed to delete mobile banner.');
+          setMobileBannerLoading(false);
+          return;
+        }
+        // Remove mobile banner from local state
+        setMobileBanners((prev) => prev.filter((b) => b._id !== deleteDialog.id));
+      } catch (err) {
+        setMobileBannerError('Network error. Please try again.');
+      } finally {
+        setMobileBannerLoading(false);
+        closeDeleteDialog();
+      }
     }
   };
 
@@ -221,11 +279,11 @@ function Dashboard() {
         setCatLoading(false);
         return;
       }
-    setCategories([
-      ...categories,
+      setCategories([
+        ...categories,
         { id: data.data._id, name: data.data.name },
-    ]);
-    setCategoryName('');
+      ]);
+      setCategoryName('');
       setCatLoading(false);
       // Focus the input after adding
       if (addCategoryInputRef.current) {
@@ -241,7 +299,7 @@ function Dashboard() {
   const handleProductInput = (e) => {
     const { name, value, files } = e.target;
     console.log('handleProductInput called:', name, value, files);
-    
+
     if (name === 'secondary_images' && files) {
       setProductForm((prev) => {
         const prevFiles = prev.secondary_images || [];
@@ -332,20 +390,20 @@ function Dashboard() {
       formData.append('stock', productForm.stock);
       formData.append('image', productForm.image);
       formData.append('categoryid', productForm.categoryid);
-      
+
       // Add secondary images
       if (productForm.secondary_images && productForm.secondary_images.length > 0) {
         productForm.secondary_images.forEach((file, index) => {
           formData.append('secondary_images', file);
         });
       }
-      
+
       // Debug: Log FormData contents
       console.log('FormData contents:');
       for (let [key, value] of formData.entries()) {
         console.log(key, value);
       }
-      
+
       const res = await fetch(`${API_BASE_URL}/product`, {
         method: 'POST',
         headers: {
@@ -428,7 +486,7 @@ function Dashboard() {
 
   const handleEditInput = (e) => {
     const { name, value, files } = e.target;
-    
+
     if (name === 'secondary_images' && files) {
       setEditForm((prev) => {
         const prevFiles = prev.secondary_images || [];
@@ -503,6 +561,128 @@ function Dashboard() {
     })
     : [];
 
+  const fetchBanners = async () => {
+    setBannerLoading(true);
+    setBannerError('');
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`${API_BASE_URL}/banner`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        // Assuming data.data is the array of urls or objects with urls
+        // Based on user description: "returns the banner list"
+        // Adjust if structure is different
+        setBanners(data.data || []);
+      } else {
+        setBannerError(data.message || 'Failed to fetch banners');
+      }
+    } catch (err) {
+      setBannerError('Network error');
+    } finally {
+      setBannerLoading(false);
+    }
+  };
+
+  const handleAddBanner = async (e) => {
+    e.preventDefault();
+    if (bannerImages.length === 0) return;
+
+    setBannerLoading(true);
+    setBannerError('');
+    const token = localStorage.getItem('token');
+
+    try {
+      const formData = new FormData();
+      Array.from(bannerImages).forEach((file) => {
+        formData.append('images', file);
+      });
+
+      const res = await fetch(`${API_BASE_URL}/banner`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        // Refresh banners
+        fetchBanners();
+        setBannerImages([]);
+      } else {
+        setBannerError(data.message || 'Failed to upload banners');
+      }
+    } catch (err) {
+      setBannerError('Network error');
+    } finally {
+      setBannerLoading(false);
+    }
+  };
+
+  const fetchMobileBanners = async () => {
+    setMobileBannerLoading(true);
+    setMobileBannerError('');
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`${API_BASE_URL}/mobilebanner`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setMobileBanners(data.data || []);
+      } else {
+        setMobileBannerError(data.message || 'Failed to fetch mobile banners');
+      }
+    } catch (err) {
+      setMobileBannerError('Network error');
+    } finally {
+      setMobileBannerLoading(false);
+    }
+  };
+
+  const handleAddMobileBanner = async (e) => {
+    e.preventDefault();
+    if (mobileBannerImages.length === 0) return;
+
+    setMobileBannerLoading(true);
+    setMobileBannerError('');
+    const token = localStorage.getItem('token');
+
+    try {
+      const formData = new FormData();
+      Array.from(mobileBannerImages).forEach((file) => {
+        formData.append('images', file);
+      });
+
+      const res = await fetch(`${API_BASE_URL}/mobilebanner`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        // Refresh mobile banners
+        fetchMobileBanners();
+        setMobileBannerImages([]);
+      } else {
+        setMobileBannerError(data.message || 'Failed to upload mobile banners');
+      }
+    } catch (err) {
+      setMobileBannerError('Network error');
+    } finally {
+      setMobileBannerLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'banners') {
+      fetchBanners();
+      fetchMobileBanners();
+    }
+  }, [activeTab]);
+
   const handleSidebarDashboardClick = () => {
     setActiveTab('dashboard');
     setTimeout(() => {
@@ -524,6 +704,13 @@ function Dashboard() {
       if (el) el.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   };
+  const handleSidebarBannerClick = () => {
+    setActiveTab('banners');
+    setTimeout(() => {
+      const el = document.getElementById('banners-section');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
 
   const isLoading = catLoading || prodLoading || editLoading;
 
@@ -536,9 +723,237 @@ function Dashboard() {
   }, [activeTab, categories.length]);
 
   return (
-    <Layout onDashboardClick={handleSidebarDashboardClick} onCategoryClick={handleSidebarCategoryClick} onProductClick={handleSidebarProductClick}>
+    <Layout onDashboardClick={handleSidebarDashboardClick} onCategoryClick={handleSidebarCategoryClick} onProductClick={handleSidebarProductClick} onBannerClick={handleSidebarBannerClick}>
       <main className="flex-1 p-2 md:p-10 bg-transparent relative">
 
+
+
+        {activeTab === 'banners' && (
+          <section className="mb-10" id="banners-section">
+            <h2 className="text-xl font-semibold text-gray-700 mb-6">Banner Management</h2>
+
+            {/* Banner Upload Form */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+              <h3 className="text-lg font-medium text-gray-800 mb-4">Add New Banners</h3>
+              <form onSubmit={handleAddBanner}>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Select Images</label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 bg-gray-50 hover:border-blue-400 transition-colors text-center cursor-pointer relative">
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          setBannerImages(Array.from(e.target.files));
+                        }
+                      }}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <div className="flex flex-col items-center">
+                      <svg className="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <p className="font-semibold text-gray-600">Click to upload images</p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {bannerImages && bannerImages.length > 0 ? `${bannerImages.length} files selected` : 'SVG, PNG, JPG or GIF'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Banner Preview Section */}
+                  {bannerImages && bannerImages.length > 0 && (
+                    <div className="mt-6">
+                      <h4 className="text-sm font-medium text-gray-700 mb-3">Selected Banners Preview</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {Array.from(bannerImages).map((file, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`Preview ${index}`}
+                              className="w-full h-32 object-cover rounded-lg shadow-sm border border-gray-200"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newImages = [...bannerImages];
+                                newImages.splice(index, 1);
+                                setBannerImages(newImages);
+                              }}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors opacity-90 hover:opacity-100"
+                              title="Remove image"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {bannerError && <p className="text-red-500 text-sm mb-4">{bannerError}</p>}
+                <button
+                  type="submit"
+                  disabled={bannerLoading || bannerImages.length === 0}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {bannerLoading ? 'Uploading...' : 'Upload Banners'}
+                </button>
+              </form>
+            </div>
+
+            {/* Banner List */}
+            <h3 className="text-lg font-medium text-gray-800 mb-4">Existing Banners</h3>
+            {bannerLoading && banners.length === 0 ? (
+              <div className="text-center py-10">Loading banners...</div>
+            ) : banners.length === 0 ? (
+              <div className="text-gray-500 italic">No banners found.</div>
+            ) : (
+              <div className="space-y-6">
+                {banners.map((banner, index) => {
+                  const images = banner.images || [];
+                  if (!images.length) return null;
+                  return (
+                    <div key={banner._id || index} className="bg-white rounded-xl shadow p-6 relative group">
+                      <div className="flex justify-between items-center mb-4">
+                        <p className="text-sm font-semibold text-gray-500">Banner Group {index + 1}</p>
+                        <button
+                          onClick={() => openDeleteDialog('banner', banner._id)}
+                          className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                          title="Delete Banner Group"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {images.map((imgUrl, idx) => (
+                          <img key={idx} src={imgUrl} alt="Banner" className="w-full h-48 object-cover rounded-lg shadow-sm" />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="border-t border-gray-200 my-10"></div>
+
+            {/* Mobile Banner Section */}
+            <h2 className="text-xl font-semibold text-gray-700 mb-6">Mobile Banner Management</h2>
+
+            {/* Mobile Banner Upload Form */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+              <h3 className="text-lg font-medium text-gray-800 mb-4">Add New Mobile Banners</h3>
+              <form onSubmit={handleAddMobileBanner}>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Select Images (Mobile)</label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 bg-gray-50 hover:border-blue-400 transition-colors text-center cursor-pointer relative">
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          setMobileBannerImages(Array.from(e.target.files));
+                        }
+                      }}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <div className="flex flex-col items-center">
+                      <svg className="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      <p className="font-semibold text-gray-600">Click to upload mobile images</p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {mobileBannerImages && mobileBannerImages.length > 0 ? `${mobileBannerImages.length} files selected` : 'SVG, PNG, JPG or GIF'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Mobile Banner Preview Section */}
+                  {mobileBannerImages && mobileBannerImages.length > 0 && (
+                    <div className="mt-6">
+                      <h4 className="text-sm font-medium text-gray-700 mb-3">Selected Mobile Banners Preview</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {Array.from(mobileBannerImages).map((file, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`Mobile Preview ${index}`}
+                              className="w-full h-32 object-cover rounded-lg shadow-sm border border-gray-200"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newImages = [...mobileBannerImages];
+                                newImages.splice(index, 1);
+                                setMobileBannerImages(newImages);
+                              }}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors opacity-90 hover:opacity-100"
+                              title="Remove image"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {mobileBannerError && <p className="text-red-500 text-sm mb-4">{mobileBannerError}</p>}
+                <button
+                  type="submit"
+                  disabled={mobileBannerLoading || mobileBannerImages.length === 0}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {mobileBannerLoading ? 'Uploading...' : 'Upload Mobile Banners'}
+                </button>
+              </form>
+            </div>
+
+            {/* Mobile Banner List */}
+            <h3 className="text-lg font-medium text-gray-800 mb-4">Existing Mobile Banners</h3>
+            {mobileBannerLoading && mobileBanners.length === 0 ? (
+              <div className="text-center py-10">Loading mobile banners...</div>
+            ) : mobileBanners.length === 0 ? (
+              <div className="text-gray-500 italic">No mobile banners found.</div>
+            ) : (
+              <div className="space-y-6">
+                {mobileBanners.map((banner, index) => {
+                  const images = banner.images || [];
+                  if (!images.length) return null;
+                  return (
+                    <div key={banner._id || index} className="bg-white rounded-xl shadow p-6 relative group">
+                      <div className="flex justify-between items-center mb-4">
+                        <p className="text-sm font-semibold text-gray-500">Mobile Banner Group {index + 1}</p>
+                        <button
+                          onClick={() => openDeleteDialog('mobilebanner', banner._id)}
+                          className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                          title="Delete Mobile Banner Group"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {images.map((imgUrl, idx) => (
+                          <img key={idx} src={imgUrl} alt="Mobile Banner" className="w-full h-48 object-cover rounded-lg shadow-sm" />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        )}
 
         {activeTab === 'dashboard' && (
           <section className="mb-10" id="dashboard-section">
@@ -604,12 +1019,12 @@ function Dashboard() {
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="w-6 h-6 bg-white rounded-full"></div>
-          </div>
-          </div>
+                    </div>
+                  </div>
                   <p className="text-blue-600 font-semibold mt-4 text-lg">Loading products...</p>
                   <p className="text-gray-500 text-sm mt-1">Please wait while we fetch your products</p>
-          </div>
-        </div>
+                </div>
+              </div>
             ) : filteredDashboardProducts.length === 0 ? (
               <div className="text-gray-400 italic py-6 text-center bg-white rounded-xl shadow">
                 {searchQuery ? 'No products found matching your search.' : 'No products available.'}
@@ -626,7 +1041,7 @@ function Dashboard() {
                         className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={() => setSelectedDashboardProduct(prod)}
                       />
-                      
+
                       {/* Action Buttons */}
                       <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
@@ -649,12 +1064,12 @@ function Dashboard() {
                         </button>
                       </div>
                     </div>
-                    
+
                     {/* Product Info */}
                     <div className="p-4">
                       <h4 className="font-semibold text-gray-800 mb-2 truncate">{prod.name}</h4>
                       <p className="text-sm text-gray-600 mb-3 line-clamp-2">{prod.description}</p>
-                      
+
                       {/* Secondary Images Preview */}
                       {prod.secondary_images && prod.secondary_images.length > 0 && (
                         <div className="mb-3">
@@ -676,7 +1091,7 @@ function Dashboard() {
                           </div>
                         </div>
                       )}
-                      
+
                       {/* Price Info */}
                       <div className="flex items-center justify-between">
                         <div>
@@ -690,9 +1105,9 @@ function Dashboard() {
                     </div>
                   </div>
                 ))}
-            </div>
-          )}
-        </section>
+              </div>
+            )}
+          </section>
         )}
 
         {/* Dashboard Product Detail Modal */}
@@ -717,7 +1132,7 @@ function Dashboard() {
               {/* Product Images */}
               <div className="mb-8">
                 <h4 className="text-xl font-semibold text-gray-700 mb-6">Product Images</h4>
-                
+
                 {/* Main Image */}
                 <div className="mb-6">
                   <h5 className="text-lg font-medium text-gray-600 mb-4">Main Image</h5>
@@ -823,7 +1238,7 @@ function Dashboard() {
             filteredProducts={filteredProducts}
             handleEditProduct={handleEditProduct}
             addCategoryInputRef={addCategoryInputRef}
-              products={products}
+            products={products}
 
           />
         )}
@@ -973,7 +1388,7 @@ function Dashboard() {
               {/* Image Updates Section */}
               <div className="space-y-6">
                 <h4 className="text-lg font-semibold text-gray-700 border-b pb-2">Image Updates</h4>
-                
+
                 {/* Main Image Update */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">Update Main Image (Optional)</label>
@@ -1005,7 +1420,7 @@ function Dashboard() {
                         <p className="text-sm text-gray-500">Select up to 3 more images for your product</p>
                       </div>
                     </div>
-                    
+
                     <input
                       type="file"
                       name="secondary_images"
@@ -1015,7 +1430,7 @@ function Dashboard() {
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all"
                       disabled={editLoading}
                     />
-                    
+
                     {/* Secondary Images Preview */}
                     {editForm.secondary_images && editForm.secondary_images.length > 0 && (
                       <div className="mt-6">

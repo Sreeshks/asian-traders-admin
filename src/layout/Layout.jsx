@@ -2,10 +2,10 @@ import React from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 
-export default function Layout({ children, onDashboardClick, onCategoryClick, onProductClick }) {
+export default function Layout({ children, onDashboardClick, onCategoryClick, onProductClick, onBannerClick }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-blue-100 flex font-sans">
-      <Sidebar onDashboardClick={onDashboardClick} onCategoryClick={onCategoryClick} onProductClick={onProductClick} />
+      <Sidebar onDashboardClick={onDashboardClick} onCategoryClick={onCategoryClick} onProductClick={onProductClick} onBannerClick={onBannerClick} />
       <div className="flex-1 flex flex-col">
         <div className="hidden md:block">
           <Header />
