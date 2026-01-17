@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export default function Sidebar({ onDashboardClick, onCategoryClick, onProductClick }) {
+export default function Sidebar({ onDashboardClick, onCategoryClick, onProductClick, onBannerClick }) {
   const [open, setOpen] = useState(false);
 
   // Close menu when clicking outside
@@ -68,7 +68,7 @@ export default function Sidebar({ onDashboardClick, onCategoryClick, onProductCl
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z" />
               </svg>
             </button>
-            
+
             <button
               className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200"
               onClick={onCategoryClick}
@@ -78,7 +78,7 @@ export default function Sidebar({ onDashboardClick, onCategoryClick, onProductCl
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
             </button>
-            
+
             <button
               className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200"
               onClick={onProductClick}
@@ -88,7 +88,17 @@ export default function Sidebar({ onDashboardClick, onCategoryClick, onProductCl
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
             </button>
-            
+
+            <button
+              className="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all duration-200"
+              onClick={onBannerClick}
+              title="Banners"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </button>
+
             <button
               className="p-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200"
               onClick={() => window.location.href = '/profile'}
@@ -103,19 +113,19 @@ export default function Sidebar({ onDashboardClick, onCategoryClick, onProductCl
       </div>
 
       {/* Mobile Menu Button - Removed since we now have navbar icons */}
-      
+
       {/* Mobile Menu Overlay - Removed since we now have navbar icons */}
 
       {/* Desktop Sidebar */}
       <aside className="w-64 bg-white shadow-xl rounded-r-3xl p-6 flex flex-col gap-8 hidden md:flex border-l-4 border-blue-500">
-                 {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
-           <img src="/logo/logo.jpeg" alt="Urban Edge Interior Logo" className="h-12 w-12 rounded-2xl object-cover shadow-lg" />
-           <div>
-             <h1 className="text-xl font-bold text-gray-800 tracking-wide">Urban Edge Interior</h1>
-             <p className="text-sm text-gray-500">Management System</p>
-           </div>
-         </div>
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-8">
+          <img src="/logo/logo.jpeg" alt="Urban Edge Interior Logo" className="h-12 w-12 rounded-2xl object-cover shadow-lg" />
+          <div>
+            <h1 className="text-xl font-bold text-gray-800 tracking-wide">Urban Edge Interior</h1>
+            <p className="text-sm text-gray-500">Management System</p>
+          </div>
+        </div>
 
         {/* Navigation */}
         <nav className="flex flex-col gap-2">
@@ -158,7 +168,20 @@ export default function Sidebar({ onDashboardClick, onCategoryClick, onProductCl
             </div>
             <span className="font-semibold">Products</span>
           </button>
-      </nav>
+
+          <button
+            type="button"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-left hover:bg-orange-50 hover:text-orange-700 text-gray-700 font-medium transition-all duration-200 group"
+            onClick={onBannerClick}
+          >
+            <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+              <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <span className="font-semibold">Banners</span>
+          </button>
+        </nav>
 
         {/* Footer */}
         <div className="mt-auto">
@@ -177,7 +200,7 @@ export default function Sidebar({ onDashboardClick, onCategoryClick, onProductCl
             &copy; {new Date().getFullYear()} Admin Panel
           </div>
         </div>
-    </aside>
+      </aside>
     </>
   );
 } 
