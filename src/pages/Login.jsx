@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../common';
 
@@ -9,6 +9,13 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
@@ -16,7 +23,7 @@ export default function Login() {
       return;
     }
     setError('');
-    setLoading(true);
+    setLoading(true); 
     try {
       const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
@@ -36,7 +43,7 @@ export default function Login() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify({ email: data.email, role: data.role, _id: data._id }));
       setLoading(false);
-    navigate('/dashboard');
+      navigate('/dashboard');
     } catch (err) {
       setError('Network error. Please try again.');
       setLoading(false);

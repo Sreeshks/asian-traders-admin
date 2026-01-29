@@ -35,6 +35,7 @@ function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [categorySearch, setCategorySearch] = useState('');
   const [selectedDashboardProduct, setSelectedDashboardProduct] = useState(null);
+  const [bannerTab, setBannerTab] = useState('desktop');
 
 
   const filteredCategories = categories.filter(cat =>
@@ -730,227 +731,252 @@ function Dashboard() {
 
         {activeTab === 'banners' && (
           <section className="mb-10" id="banners-section">
-            <h2 className="text-xl font-semibold text-gray-700 mb-6">Banner Management</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+              <h2 className="text-xl font-semibold text-gray-700">Banner Management</h2>
+              <div className="flex bg-gray-100 p-1 rounded-xl self-start sm:self-auto">
+                <button
+                  onClick={() => setBannerTab('desktop')}
+                  className={`px-6 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${bannerTab === 'desktop'
+                    ? 'bg-white text-blue-600 shadow-md transform scale-105'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'
+                    }`}
+                >
+                  Desktop
+                </button>
+                <button
+                  onClick={() => setBannerTab('mobile')}
+                  className={`px-6 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${bannerTab === 'mobile'
+                    ? 'bg-white text-blue-600 shadow-md transform scale-105'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'
+                    }`}
+                >
+                  Mobile
+                </button>
+              </div>
+            </div>
 
-            {/* Banner Upload Form */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-              <h3 className="text-lg font-medium text-gray-800 mb-4">Add New Banners</h3>
-              <form onSubmit={handleAddBanner}>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Select Images</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 bg-gray-50 hover:border-blue-400 transition-colors text-center cursor-pointer relative">
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files.length > 0) {
-                          setBannerImages(Array.from(e.target.files));
-                        }
-                      }}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-                    <div className="flex flex-col items-center">
-                      <svg className="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <p className="font-semibold text-gray-600">Click to upload images</p>
-                      <p className="text-sm text-gray-500 mt-1">
-                        {bannerImages && bannerImages.length > 0 ? `${bannerImages.length} files selected` : 'SVG, PNG, JPG or GIF'}
-                      </p>
+            {bannerTab === 'desktop' ? (
+              <>
+                {/* Banner Upload Form */}
+                <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                  <h3 className="text-lg font-medium text-gray-800 mb-4">Add New Banners</h3>
+                  <form onSubmit={handleAddBanner}>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Select Images</label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 bg-gray-50 hover:border-blue-400 transition-colors text-center cursor-pointer relative">
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                              setBannerImages(Array.from(e.target.files));
+                            }
+                          }}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <div className="flex flex-col items-center">
+                          <svg className="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <p className="font-semibold text-gray-600">Click to upload images</p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {bannerImages && bannerImages.length > 0 ? `${bannerImages.length} files selected` : 'SVG, PNG, JPG or GIF'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Banner Preview Section */}
+                      {bannerImages && bannerImages.length > 0 && (
+                        <div className="mt-6">
+                          <h4 className="text-sm font-medium text-gray-700 mb-3">Selected Banners Preview</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {Array.from(bannerImages).map((file, index) => (
+                              <div key={index} className="relative group">
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={`Preview ${index}`}
+                                  className="w-full h-32 object-cover rounded-lg shadow-sm border border-gray-200"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newImages = [...bannerImages];
+                                    newImages.splice(index, 1);
+                                    setBannerImages(newImages);
+                                  }}
+                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors opacity-90 hover:opacity-100"
+                                  title="Remove image"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
+                    {bannerError && <p className="text-red-500 text-sm mb-4">{bannerError}</p>}
+                    <button
+                      type="submit"
+                      disabled={bannerLoading || bannerImages.length === 0}
+                      className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {bannerLoading ? 'Uploading...' : 'Upload Banners'}
+                    </button>
+                  </form>
+                </div>
 
-                  {/* Banner Preview Section */}
-                  {bannerImages && bannerImages.length > 0 && (
-                    <div className="mt-6">
-                      <h4 className="text-sm font-medium text-gray-700 mb-3">Selected Banners Preview</h4>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {Array.from(bannerImages).map((file, index) => (
-                          <div key={index} className="relative group">
-                            <img
-                              src={URL.createObjectURL(file)}
-                              alt={`Preview ${index}`}
-                              className="w-full h-32 object-cover rounded-lg shadow-sm border border-gray-200"
-                            />
+                {/* Banner List */}
+                <h3 className="text-lg font-medium text-gray-800 mb-4">Existing Banners</h3>
+                {bannerLoading && banners.length === 0 ? (
+                  <div className="text-center py-10">Loading banners...</div>
+                ) : banners.length === 0 ? (
+                  <div className="text-gray-500 italic">No banners found.</div>
+                ) : (
+                  <div className="space-y-6">
+                    {banners.map((banner, index) => {
+                      const images = banner.images || [];
+                      if (!images.length) return null;
+                      return (
+                        <div key={banner._id || index} className="bg-white rounded-xl shadow p-6 relative group">
+                          <div className="flex justify-between items-center mb-4">
+                            <p className="text-sm font-semibold text-gray-500">Banner Group {index + 1}</p>
                             <button
-                              type="button"
-                              onClick={() => {
-                                const newImages = [...bannerImages];
-                                newImages.splice(index, 1);
-                                setBannerImages(newImages);
-                              }}
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors opacity-90 hover:opacity-100"
-                              title="Remove image"
+                              onClick={() => openDeleteDialog('banner', banner._id)}
+                              className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                              title="Delete Banner Group"
                             >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                               </svg>
                             </button>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                {bannerError && <p className="text-red-500 text-sm mb-4">{bannerError}</p>}
-                <button
-                  type="submit"
-                  disabled={bannerLoading || bannerImages.length === 0}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  {bannerLoading ? 'Uploading...' : 'Upload Banners'}
-                </button>
-              </form>
-            </div>
-
-            {/* Banner List */}
-            <h3 className="text-lg font-medium text-gray-800 mb-4">Existing Banners</h3>
-            {bannerLoading && banners.length === 0 ? (
-              <div className="text-center py-10">Loading banners...</div>
-            ) : banners.length === 0 ? (
-              <div className="text-gray-500 italic">No banners found.</div>
-            ) : (
-              <div className="space-y-6">
-                {banners.map((banner, index) => {
-                  const images = banner.images || [];
-                  if (!images.length) return null;
-                  return (
-                    <div key={banner._id || index} className="bg-white rounded-xl shadow p-6 relative group">
-                      <div className="flex justify-between items-center mb-4">
-                        <p className="text-sm font-semibold text-gray-500">Banner Group {index + 1}</p>
-                        <button
-                          onClick={() => openDeleteDialog('banner', banner._id)}
-                          className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
-                          title="Delete Banner Group"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {images.map((imgUrl, idx) => (
-                          <img key={idx} src={imgUrl} alt="Banner" className="w-full h-48 object-cover rounded-lg shadow-sm" />
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            <div className="border-t border-gray-200 my-10"></div>
-
-            {/* Mobile Banner Section */}
-            <h2 className="text-xl font-semibold text-gray-700 mb-6">Mobile Banner Management</h2>
-
-            {/* Mobile Banner Upload Form */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-              <h3 className="text-lg font-medium text-gray-800 mb-4">Add New Mobile Banners</h3>
-              <form onSubmit={handleAddMobileBanner}>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Select Images (Mobile)</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 bg-gray-50 hover:border-blue-400 transition-colors text-center cursor-pointer relative">
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files.length > 0) {
-                          setMobileBannerImages(Array.from(e.target.files));
-                        }
-                      }}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-                    <div className="flex flex-col items-center">
-                      <svg className="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                      <p className="font-semibold text-gray-600">Click to upload mobile images</p>
-                      <p className="text-sm text-gray-500 mt-1">
-                        {mobileBannerImages && mobileBannerImages.length > 0 ? `${mobileBannerImages.length} files selected` : 'SVG, PNG, JPG or GIF'}
-                      </p>
-                    </div>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {images.map((imgUrl, idx) => (
+                              <img key={idx} src={imgUrl} alt="Banner" className="w-full h-48 object-cover rounded-lg shadow-sm" />
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
+                )}
 
-                  {/* Mobile Banner Preview Section */}
-                  {mobileBannerImages && mobileBannerImages.length > 0 && (
-                    <div className="mt-6">
-                      <h4 className="text-sm font-medium text-gray-700 mb-3">Selected Mobile Banners Preview</h4>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {Array.from(mobileBannerImages).map((file, index) => (
-                          <div key={index} className="relative group">
-                            <img
-                              src={URL.createObjectURL(file)}
-                              alt={`Mobile Preview ${index}`}
-                              className="w-full h-32 object-cover rounded-lg shadow-sm border border-gray-200"
-                            />
+              </>
+            ) : (
+              <>
+
+                {/* Mobile Banner Upload Form */}
+                <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                  <h3 className="text-lg font-medium text-gray-800 mb-4">Add New Mobile Banners</h3>
+                  <form onSubmit={handleAddMobileBanner}>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Select Images (Mobile)</label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 bg-gray-50 hover:border-blue-400 transition-colors text-center cursor-pointer relative">
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                              setMobileBannerImages(Array.from(e.target.files));
+                            }
+                          }}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <div className="flex flex-col items-center">
+                          <svg className="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                          </svg>
+                          <p className="font-semibold text-gray-600">Click to upload mobile images</p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {mobileBannerImages && mobileBannerImages.length > 0 ? `${mobileBannerImages.length} files selected` : 'SVG, PNG, JPG or GIF'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Mobile Banner Preview Section */}
+                      {mobileBannerImages && mobileBannerImages.length > 0 && (
+                        <div className="mt-6">
+                          <h4 className="text-sm font-medium text-gray-700 mb-3">Selected Mobile Banners Preview</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {Array.from(mobileBannerImages).map((file, index) => (
+                              <div key={index} className="relative group">
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={`Mobile Preview ${index}`}
+                                  className="w-full h-32 object-cover rounded-lg shadow-sm border border-gray-200"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newImages = [...mobileBannerImages];
+                                    newImages.splice(index, 1);
+                                    setMobileBannerImages(newImages);
+                                  }}
+                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors opacity-90 hover:opacity-100"
+                                  title="Remove image"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {mobileBannerError && <p className="text-red-500 text-sm mb-4">{mobileBannerError}</p>}
+                    <button
+                      type="submit"
+                      disabled={mobileBannerLoading || mobileBannerImages.length === 0}
+                      className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {mobileBannerLoading ? 'Uploading...' : 'Upload Mobile Banners'}
+                    </button>
+                  </form>
+                </div>
+
+                {/* Mobile Banner List */}
+                <h3 className="text-lg font-medium text-gray-800 mb-4">Existing Mobile Banners</h3>
+                {mobileBannerLoading && mobileBanners.length === 0 ? (
+                  <div className="text-center py-10">Loading mobile banners...</div>
+                ) : mobileBanners.length === 0 ? (
+                  <div className="text-gray-500 italic">No mobile banners found.</div>
+                ) : (
+                  <div className="space-y-6">
+                    {mobileBanners.map((banner, index) => {
+                      const images = banner.images || [];
+                      if (!images.length) return null;
+                      return (
+                        <div key={banner._id || index} className="bg-white rounded-xl shadow p-6 relative group">
+                          <div className="flex justify-between items-center mb-4">
+                            <p className="text-sm font-semibold text-gray-500">Mobile Banner Group {index + 1}</p>
                             <button
-                              type="button"
-                              onClick={() => {
-                                const newImages = [...mobileBannerImages];
-                                newImages.splice(index, 1);
-                                setMobileBannerImages(newImages);
-                              }}
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors opacity-90 hover:opacity-100"
-                              title="Remove image"
+                              onClick={() => openDeleteDialog('mobilebanner', banner._id)}
+                              className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                              title="Delete Mobile Banner Group"
                             >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                               </svg>
                             </button>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                {mobileBannerError && <p className="text-red-500 text-sm mb-4">{mobileBannerError}</p>}
-                <button
-                  type="submit"
-                  disabled={mobileBannerLoading || mobileBannerImages.length === 0}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  {mobileBannerLoading ? 'Uploading...' : 'Upload Mobile Banners'}
-                </button>
-              </form>
-            </div>
-
-            {/* Mobile Banner List */}
-            <h3 className="text-lg font-medium text-gray-800 mb-4">Existing Mobile Banners</h3>
-            {mobileBannerLoading && mobileBanners.length === 0 ? (
-              <div className="text-center py-10">Loading mobile banners...</div>
-            ) : mobileBanners.length === 0 ? (
-              <div className="text-gray-500 italic">No mobile banners found.</div>
-            ) : (
-              <div className="space-y-6">
-                {mobileBanners.map((banner, index) => {
-                  const images = banner.images || [];
-                  if (!images.length) return null;
-                  return (
-                    <div key={banner._id || index} className="bg-white rounded-xl shadow p-6 relative group">
-                      <div className="flex justify-between items-center mb-4">
-                        <p className="text-sm font-semibold text-gray-500">Mobile Banner Group {index + 1}</p>
-                        <button
-                          onClick={() => openDeleteDialog('mobilebanner', banner._id)}
-                          className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
-                          title="Delete Mobile Banner Group"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {images.map((imgUrl, idx) => (
-                          <img key={idx} src={imgUrl} alt="Mobile Banner" className="w-full h-48 object-cover rounded-lg shadow-sm" />
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {images.map((imgUrl, idx) => (
+                              <img key={idx} src={imgUrl} alt="Mobile Banner" className="w-full h-48 object-cover rounded-lg shadow-sm" />
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
             )}
           </section>
         )}
@@ -1265,326 +1291,330 @@ function Dashboard() {
         )}
       </main>
       {/* Edit Product Modal - Moved outside sections to work from all tabs */}
-      {editProduct && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-4xl mx-4 relative transform transition-all duration-300 scale-100 animate-fadeIn max-h-[90vh] overflow-y-auto">
-            {/* Close button */}
-            <button
-              className="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-2xl font-bold transition-colors duration-200 z-10"
-              onClick={() => setEditProduct(null)}
-              aria-label="Close"
-            >
-              ×
-            </button>
+      {
+        editProduct && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-4xl mx-4 relative transform transition-all duration-300 scale-100 animate-fadeIn max-h-[90vh] overflow-y-auto">
+              {/* Close button */}
+              <button
+                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-2xl font-bold transition-colors duration-200 z-10"
+                onClick={() => setEditProduct(null)}
+                aria-label="Close"
+              >
+                ×
+              </button>
 
-            {/* Modal Header */}
-            <div className="text-center mb-8">
-              <h3 className="text-3xl font-bold text-gray-800 mb-2">Edit Product</h3>
-              <p className="text-gray-600 text-lg">Update product information</p>
-            </div>
-
-            {/* Current Product Image Preview */}
-            <div className="mb-8 text-center">
-              <div className="relative inline-block">
-                <img
-                  src={editProduct.image}
-                  alt={editProduct.name}
-                  className="h-32 w-32 object-cover rounded-lg shadow-lg mx-auto mb-3"
-                />
-                <div className="absolute -top-2 -right-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
-                  Current
-                </div>
-              </div>
-              <p className="text-lg font-semibold text-gray-700">{editProduct.name}</p>
-            </div>
-
-            {/* Edit Form */}
-            <form className="space-y-6" onSubmit={handleUpdateProduct}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Enter product name"
-                    value={editForm.name}
-                    onChange={handleEditInput}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200"
-                    required
-                    disabled={editLoading}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                  <select
-                    name="categoryid"
-                    value={editForm.categoryid}
-                    onChange={handleEditInput}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200"
-                    required
-                    disabled={editLoading}
-                  >
-                    <option value="">Select Category</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>{cat.name}</option>
-                    ))}
-                  </select>
-                </div>
+              {/* Modal Header */}
+              <div className="text-center mb-8">
+                <h3 className="text-3xl font-bold text-gray-800 mb-2">Edit Product</h3>
+                <p className="text-gray-600 text-lg">Update product information</p>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                <textarea
-                  name="description"
-                  placeholder="Enter product description"
-                  value={editForm.description}
-                  onChange={handleEditInput}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200 resize-none"
-                  rows="4"
-                  disabled={editLoading}
-                />
+              {/* Current Product Image Preview */}
+              <div className="mb-8 text-center">
+                <div className="relative inline-block">
+                  <img
+                    src={editProduct.image}
+                    alt={editProduct.name}
+                    className="h-32 w-32 object-cover rounded-lg shadow-lg mx-auto mb-3"
+                  />
+                  <div className="absolute -top-2 -right-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                    Current
+                  </div>
+                </div>
+                <p className="text-lg font-semibold text-gray-700">{editProduct.name}</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
-                  <input
-                    type="number"
-                    name="price"
-                    placeholder="0.00"
-                    value={editForm.price}
-                    onChange={handleEditInput}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200"
-                    required
-                    disabled={editLoading}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Offer Price</label>
-                  <input
-                    type="number"
-                    name="offerprice"
-                    placeholder="0.00"
-                    value={editForm.offerprice}
-                    onChange={handleEditInput}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200"
-                    disabled={editLoading}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Stock</label>
-                  <input
-                    type="number"
-                    name="stock"
-                    placeholder="0"
-                    value={editForm.stock}
-                    onChange={handleEditInput}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200"
-                    disabled={editLoading}
-                  />
-                </div>
-              </div>
-
-              {/* Image Updates Section */}
-              <div className="space-y-6">
-                <h4 className="text-lg font-semibold text-gray-700 border-b pb-2">Image Updates</h4>
-
-                {/* Main Image Update */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">Update Main Image (Optional)</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 bg-gray-50 hover:border-blue-400 transition-colors">
+              {/* Edit Form */}
+              <form className="space-y-6" onSubmit={handleUpdateProduct}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
                     <input
-                      type="file"
-                      name="image"
-                      accept="image/*"
+                      type="text"
+                      name="name"
+                      placeholder="Enter product name"
+                      value={editForm.name}
                       onChange={handleEditInput}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200"
+                      required
                       disabled={editLoading}
                     />
-                    <p className="text-xs text-gray-500 mt-2">Leave empty to keep the current main image</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                    <select
+                      name="categoryid"
+                      value={editForm.categoryid}
+                      onChange={handleEditInput}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200"
+                      required
+                      disabled={editLoading}
+                    >
+                      <option value="">Select Category</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
-                {/* Secondary Images Update */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">Update Secondary Images (Optional - Max 3)</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 bg-gray-50 hover:border-blue-400 transition-colors">
-                    <div className="flex items-center justify-center mb-4">
-                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                        <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-gray-700">Add Additional Images</p>
-                        <p className="text-sm text-gray-500">Select up to 3 more images for your product</p>
-                      </div>
-                    </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <textarea
+                    name="description"
+                    placeholder="Enter product description"
+                    value={editForm.description}
+                    onChange={handleEditInput}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200 resize-none"
+                    rows="4"
+                    disabled={editLoading}
+                  />
+                </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
                     <input
-                      type="file"
-                      name="secondary_images"
-                      accept="image/*"
-                      multiple
+                      type="number"
+                      name="price"
+                      placeholder="0.00"
+                      value={editForm.price}
                       onChange={handleEditInput}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200"
+                      required
                       disabled={editLoading}
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Offer Price</label>
+                    <input
+                      type="number"
+                      name="offerprice"
+                      placeholder="0.00"
+                      value={editForm.offerprice}
+                      onChange={handleEditInput}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200"
+                      disabled={editLoading}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Stock</label>
+                    <input
+                      type="number"
+                      name="stock"
+                      placeholder="0"
+                      value={editForm.stock}
+                      onChange={handleEditInput}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200"
+                      disabled={editLoading}
+                    />
+                  </div>
+                </div>
 
-                    {/* Secondary Images Preview */}
-                    {editForm.secondary_images && editForm.secondary_images.length > 0 && (
-                      <div className="mt-6">
-                        <h5 className="text-sm font-medium text-gray-700 mb-3">Selected Images ({editForm.secondary_images.length}/3)</h5>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                          {editForm.secondary_images.map((file, index) => (
-                            <div key={index} className="relative group flex flex-col items-center">
-                              <div className="relative">
-                                <img
-                                  src={URL.createObjectURL(file)}
-                                  alt={`Preview ${index + 1}`}
-                                  className="w-24 h-24 object-cover rounded-lg shadow-lg border-2 border-blue-100"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setEditForm(prev => ({
-                                      ...prev,
-                                      secondary_images: prev.secondary_images.filter((_, i) => i !== index)
-                                    }));
-                                  }}
-                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center shadow hover:bg-red-600 transition-colors opacity-80 hover:opacity-100"
-                                >
-                                  ×
-                                </button>
-                              </div>
-                              <p className="text-xs text-gray-600 mt-2 truncate w-24 text-center">{file.name}</p>
-                            </div>
-                          ))}
+                {/* Image Updates Section */}
+                <div className="space-y-6">
+                  <h4 className="text-lg font-semibold text-gray-700 border-b pb-2">Image Updates</h4>
+
+                  {/* Main Image Update */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">Update Main Image (Optional)</label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 bg-gray-50 hover:border-blue-400 transition-colors">
+                      <input
+                        type="file"
+                        name="image"
+                        accept="image/*"
+                        onChange={handleEditInput}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        disabled={editLoading}
+                      />
+                      <p className="text-xs text-gray-500 mt-2">Leave empty to keep the current main image</p>
+                    </div>
+                  </div>
+
+                  {/* Secondary Images Update */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">Update Secondary Images (Optional - Max 3)</label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 bg-gray-50 hover:border-blue-400 transition-colors">
+                      <div className="flex items-center justify-center mb-4">
+                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                          <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-700">Add Additional Images</p>
+                          <p className="text-sm text-gray-500">Select up to 3 more images for your product</p>
                         </div>
                       </div>
-                    )}
-                  </div>
-                </div>
-              </div>
 
-              {/* Error Message */}
-              {prodError && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <div className="flex">
-                    <svg className="w-5 h-5 text-red-400 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <p className="text-red-600 text-sm">{prodError}</p>
-                  </div>
-                </div>
-              )}
+                      <input
+                        type="file"
+                        name="secondary_images"
+                        accept="image/*"
+                        multiple
+                        onChange={handleEditInput}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all"
+                        disabled={editLoading}
+                      />
 
-              {/* Action Buttons */}
-              <div className="flex gap-4 pt-6">
-                <button
-                  type="button"
-                  className="flex-1 px-6 py-3 rounded-lg border-2 border-red-300 text-red-700 font-semibold hover:bg-red-50 transition-all duration-200"
-                  onClick={() => openDeleteDialog('product', editProduct._id)}
-                  disabled={editLoading}
-                >
-                  Delete Product
-                </button>
-                <button
-                  type="button"
-                  className="flex-1 px-6 py-3 rounded-lg border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200"
-                  onClick={() => setEditProduct(null)}
-                  disabled={editLoading}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-6 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={editLoading}
-                >
-                  {editLoading ? (
-                    <div className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                      </svg>
-                      Updating...
+                      {/* Secondary Images Preview */}
+                      {editForm.secondary_images && editForm.secondary_images.length > 0 && (
+                        <div className="mt-6">
+                          <h5 className="text-sm font-medium text-gray-700 mb-3">Selected Images ({editForm.secondary_images.length}/3)</h5>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            {editForm.secondary_images.map((file, index) => (
+                              <div key={index} className="relative group flex flex-col items-center">
+                                <div className="relative">
+                                  <img
+                                    src={URL.createObjectURL(file)}
+                                    alt={`Preview ${index + 1}`}
+                                    className="w-24 h-24 object-cover rounded-lg shadow-lg border-2 border-blue-100"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setEditForm(prev => ({
+                                        ...prev,
+                                        secondary_images: prev.secondary_images.filter((_, i) => i !== index)
+                                      }));
+                                    }}
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center shadow hover:bg-red-600 transition-colors opacity-80 hover:opacity-100"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                                <p className="text-xs text-gray-600 mt-2 truncate w-24 text-center">{file.name}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    'Update Product'
-                  )}
-                </button>
-              </div>
-            </form>
+                  </div>
+                </div>
+
+                {/* Error Message */}
+                {prodError && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex">
+                      <svg className="w-5 h-5 text-red-400 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-red-600 text-sm">{prodError}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-4 pt-6">
+                  <button
+                    type="button"
+                    className="flex-1 px-6 py-3 rounded-lg border-2 border-red-300 text-red-700 font-semibold hover:bg-red-50 transition-all duration-200"
+                    onClick={() => openDeleteDialog('product', editProduct._id)}
+                    disabled={editLoading}
+                  >
+                    Delete Product
+                  </button>
+                  <button
+                    type="button"
+                    className="flex-1 px-6 py-3 rounded-lg border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200"
+                    onClick={() => setEditProduct(null)}
+                    disabled={editLoading}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-6 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={editLoading}
+                  >
+                    {editLoading ? (
+                      <div className="flex items-center justify-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+                        Updating...
+                      </div>
+                    ) : (
+                      'Update Product'
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
       {/* Custom Delete Confirmation Dialog */}
-      {deleteDialog.open && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white bg-opacity-10 backdrop-blur-2xl">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm mx-4 relative animate-fadeIn">
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-red-100 rounded-full p-3 mb-4">
-                <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </div>
+      {
+        deleteDialog.open && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white bg-opacity-10 backdrop-blur-2xl">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm mx-4 relative animate-fadeIn">
+              <div className="flex flex-col items-center text-center">
+                <div className="bg-red-100 rounded-full p-3 mb-4">
+                  <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
 
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Confirm Deletion</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">Confirm Deletion</h3>
 
-              {deleteDialog.type === 'category' && activeTab === 'categories' ? (
-                <>
-                  <p className="text-gray-600 mb-4">
-                    This category may have products. Do you want to delete them too?<br />
+                {deleteDialog.type === 'category' && activeTab === 'categories' ? (
+                  <>
+                    <p className="text-gray-600 mb-4">
+                      This category may have products. Do you want to delete them too?<br />
+                      <span className="text-red-500 font-medium">This action cannot be undone.</span>
+                    </p>
+
+                    <div className="mb-4 w-full flex flex-col items-start gap-2">
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={deleteDialog.deleteProducts || false}
+                          onChange={() =>
+                            setDeleteDialog(prev => ({
+                              ...prev,
+                              deleteProducts: !prev.deleteProducts
+                            }))
+                          }
+                          className="accent-red-500"
+                        />
+                        <span className="text-sm text-gray-700">Also delete all products in this category</span>
+                      </label>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-gray-600 mb-6">
+                    Are you sure you want to delete this {deleteDialog.type}?<br />
                     <span className="text-red-500 font-medium">This action cannot be undone.</span>
                   </p>
+                )}
 
-                  <div className="mb-4 w-full flex flex-col items-start gap-2">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={deleteDialog.deleteProducts || false}
-                        onChange={() =>
-                          setDeleteDialog(prev => ({
-                            ...prev,
-                            deleteProducts: !prev.deleteProducts
-                          }))
-                        }
-                        className="accent-red-500"
-                      />
-                      <span className="text-sm text-gray-700">Also delete all products in this category</span>
-                    </label>
-                  </div>
-                </>
-              ) : (
-                <p className="text-gray-600 mb-6">
-                  Are you sure you want to delete this {deleteDialog.type}?<br />
-                  <span className="text-red-500 font-medium">This action cannot be undone.</span>
-                </p>
-              )}
-
-              <div className="flex gap-3 w-full">
-                <button
-                  className="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200"
-                  onClick={closeDeleteDialog}
-                  disabled={catLoading || prodLoading}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={handleConfirmDelete}
-                  disabled={catLoading || prodLoading}
-                >
-                  Delete
-                </button>
+                <div className="flex gap-3 w-full">
+                  <button
+                    className="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200"
+                    onClick={closeDeleteDialog}
+                    disabled={catLoading || prodLoading}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleConfirmDelete}
+                    disabled={catLoading || prodLoading}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
-    </Layout>
+    </Layout >
   );
 }
 
